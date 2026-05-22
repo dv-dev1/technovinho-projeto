@@ -36,8 +36,10 @@ with st.sidebar:
 
 if st.session_state.token:
     if st.session_state.user.get("role") == "admin":
-        st.success("Logado como admin. Abra **Profissionais** ou **Disponibilidade** no menu.")
+        st.success("Admin: **Profissionais**, **Disponibilidade**.")
+    elif st.session_state.user.get("role") == "client":
+        st.success("Cliente: abra **Meus agendamentos**.")
     else:
-        st.warning("Perfil sem acesso admin às telas de gestão.")
+        st.info("Use o menu conforme seu perfil.")
 else:
     st.info("Entre com usuário admin para gerenciar profissionais e disponibilidade.")

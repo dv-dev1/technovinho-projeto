@@ -67,3 +67,20 @@ def create_availability(token: str, professional_id: int, payload: dict) -> dict
 
 def delete_availability(token: str, availability_id: int) -> None:
     _request("DELETE", f"/api/availability/{availability_id}", token=token)
+
+
+def list_appointments(token: str, *, status: str | None = None, mine: bool = False) -> list:
+    params = {}
+    if status:
+        params["status"] = status
+    if mine:
+        params["mine"] = "true"
+    return _request("GET", "/api/appointments", token=token, params=params) or []
+
+
+def create_appointment(token: str, payload: dict) -> dict:
+    return _request("POST", "/api/appointments", token=token, json=payload)
+
+
+def cancel_appointment(token: str, appointment_id: int) -> dict:
+    return _request("PATCH", f"/api/appointments/{appointment_id}/cancel", token=token)
