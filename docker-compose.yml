@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-technovinho}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-technovinho}
+      POSTGRES_DB: ${POSTGRES_DB:-technovinho}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-technovinho}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - technovinho-net
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-technovinho}:${POSTGRES_PASSWORD:-technovinho}@db:5432/${POSTGRES_DB:-technovinho}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - technovinho-net
+
+networks:
+  technovinho-net:
+
+volumes:
+  pgdata:
