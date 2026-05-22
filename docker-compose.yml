@@ -33,6 +33,19 @@ services:
     networks:
       - technovinho-net
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8501:8501"
+    environment:
+      API_BASE_URL: http://api:8000
+    depends_on:
+      - api
+    networks:
+      - technovinho-net
+
 networks:
   technovinho-net:
 
