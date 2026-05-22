@@ -22,3 +22,5 @@ Documentação completa do time: repositório de gestão `Technovinho` → `docs
 4. PR para `develop`
 
 Não commitar `.env` nem secrets.
+
+Não usar `Co-authored-by: Cursor` nos commits — mantém só autoria do integrante do time.
