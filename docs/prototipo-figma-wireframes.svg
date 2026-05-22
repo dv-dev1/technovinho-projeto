@@ -1,0 +1,252 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2070" height="1380" viewBox="0 0 2070 1380">
+  <defs>
+    <style>
+      .page { fill: #f8fafc; }
+      .frame { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; }
+      .top { fill: #431407; }
+      .side { fill: #fff7ed; stroke: #fed7aa; stroke-width: 1; }
+      .card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+      .input { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.5; }
+      .button { fill: #7c2d12; }
+      .button2 { fill: #f59e0b; }
+      .mutedBox { fill: #e2e8f0; }
+      .success { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; }
+      .danger { fill: #fee2e2; stroke: #dc2626; stroke-width: 1.5; }
+      .slotFree { fill: #dcfce7; stroke: #16a34a; stroke-width: 1; }
+      .slotBusy { fill: #fee2e2; stroke: #dc2626; stroke-width: 1; }
+      .t1 { font-family: Arial, sans-serif; font-size: 26px; font-weight: 700; fill: #111827; }
+      .t2 { font-family: Arial, sans-serif; font-size: 18px; font-weight: 700; fill: #111827; }
+      .txt { font-family: Arial, sans-serif; font-size: 14px; fill: #111827; }
+      .small { font-family: Arial, sans-serif; font-size: 12px; fill: #64748b; }
+      .white { font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; fill: #ffffff; }
+      .label { font-family: Arial, sans-serif; font-size: 11px; font-weight: 700; fill: #7c2d12; }
+    </style>
+  </defs>
+
+  <rect class="page" width="2070" height="1380"/>
+
+  <g id="frame-01-login" transform="translate(60,60)">
+    <rect class="frame" width="360" height="600" rx="12"/>
+    <text class="label" x="24" y="30">01 / RF01 + RNF01</text>
+    <text class="t1" x="24" y="76">Login</text>
+    <text class="small" x="24" y="102">Acesso seguro ao TECHNOVINHO</text>
+    <rect class="card" x="24" y="140" width="312" height="310" rx="8"/>
+    <text class="t2" x="48" y="180">Entrar</text>
+    <text class="small" x="48" y="215">Email</text>
+    <rect class="input" x="48" y="226" width="264" height="42" rx="6"/>
+    <text class="small" x="48" y="292">Senha</text>
+    <rect class="input" x="48" y="303" width="264" height="42" rx="6"/>
+    <rect class="button" x="48" y="372" width="264" height="44" rx="6"/>
+    <text class="white" x="158" y="400">Entrar</text>
+    <text class="small" x="90" y="438">Criar nova conta</text>
+    <rect class="mutedBox" x="24" y="488" width="312" height="48" rx="6"/>
+    <text class="small" x="44" y="517">Validar email/senha e guardar token JWT</text>
+  </g>
+
+  <g id="frame-02-registro" transform="translate(450,60)">
+    <rect class="frame" width="360" height="600" rx="12"/>
+    <text class="label" x="24" y="30">02 / RF01 + RNF01</text>
+    <text class="t1" x="24" y="76">Registro</text>
+    <text class="small" x="24" y="102">Cadastro de cliente</text>
+    <rect class="card" x="24" y="130" width="312" height="370" rx="8"/>
+    <text class="small" x="48" y="166">Nome</text>
+    <rect class="input" x="48" y="177" width="264" height="42" rx="6"/>
+    <text class="small" x="48" y="243">Email</text>
+    <rect class="input" x="48" y="254" width="264" height="42" rx="6"/>
+    <text class="small" x="48" y="320">Senha</text>
+    <rect class="input" x="48" y="331" width="264" height="42" rx="6"/>
+    <rect class="mutedBox" x="48" y="393" width="120" height="34" rx="6"/>
+    <text class="txt" x="70" y="415">Cliente</text>
+    <rect class="button" x="48" y="448" width="264" height="44" rx="6"/>
+    <text class="white" x="140" y="476">Criar conta</text>
+    <text class="small" x="114" y="532">Ja tenho acesso</text>
+  </g>
+
+  <g id="frame-03-home-cliente" transform="translate(840,60)">
+    <rect class="frame" width="360" height="600" rx="12"/>
+    <rect class="top" width="360" height="58" rx="12"/>
+    <text class="white" x="22" y="36">TECHNOVINHO</text>
+    <text class="label" x="24" y="88">03 / Home cliente</text>
+    <text class="t1" x="24" y="128">Servicos</text>
+    <rect class="card" x="24" y="154" width="312" height="100" rx="8"/>
+    <text class="t2" x="44" y="186">Corte masculino</text>
+    <text class="small" x="44" y="211">45 min - R$ 35,00</text>
+    <rect class="button" x="228" y="198" width="84" height="34" rx="6"/>
+    <text class="white" x="243" y="220">Agendar</text>
+    <rect class="card" x="24" y="270" width="312" height="100" rx="8"/>
+    <text class="t2" x="44" y="302">Barba</text>
+    <text class="small" x="44" y="327">30 min - R$ 25,00</text>
+    <rect class="button" x="228" y="314" width="84" height="34" rx="6"/>
+    <text class="white" x="243" y="336">Agendar</text>
+    <rect class="card" x="24" y="386" width="312" height="100" rx="8"/>
+    <text class="t2" x="44" y="418">Corte + Barba</text>
+    <text class="small" x="44" y="443">75 min - R$ 55,00</text>
+    <rect class="button" x="228" y="430" width="84" height="34" rx="6"/>
+    <text class="white" x="243" y="452">Agendar</text>
+    <text class="small" x="24" y="548">Nav: Servicos | Meus agendamentos | Sair</text>
+  </g>
+
+  <g id="frame-04-agendamento-steps" transform="translate(1230,60)">
+    <rect class="frame" width="360" height="600" rx="12"/>
+    <rect class="top" width="360" height="58" rx="12"/>
+    <text class="white" x="22" y="36">Novo agendamento</text>
+    <text class="label" x="24" y="88">04 / Agendamento em steps</text>
+    <circle cx="52" cy="126" r="16" fill="#7c2d12"/><text class="white" x="48" y="131">1</text>
+    <circle cx="126" cy="126" r="16" fill="#f59e0b"/><text class="white" x="122" y="131">2</text>
+    <circle cx="200" cy="126" r="16" fill="#e2e8f0"/><text class="txt" x="196" y="131">3</text>
+    <circle cx="274" cy="126" r="16" fill="#e2e8f0"/><text class="txt" x="270" y="131">4</text>
+    <text class="small" x="24" y="168">Servico selecionado: Corte masculino</text>
+    <rect class="card" x="24" y="192" width="312" height="70" rx="8"/>
+    <text class="t2" x="44" y="223">Escolher profissional</text>
+    <text class="small" x="44" y="246">Joao, Maria ou qualquer disponivel</text>
+    <rect class="card" x="24" y="278" width="312" height="70" rx="8"/>
+    <text class="t2" x="44" y="309">Escolher horario</text>
+    <text class="small" x="44" y="332">Hoje, 14:00 - 15:00</text>
+    <rect class="card" x="24" y="364" width="312" height="98" rx="8"/>
+    <text class="t2" x="44" y="395">Resumo</text>
+    <text class="small" x="44" y="420">Servico, profissional, data, preco</text>
+    <rect class="button" x="180" y="500" width="156" height="44" rx="6"/>
+    <text class="white" x="216" y="528">Continuar</text>
+  </g>
+
+  <g id="frame-05-confirmacao" transform="translate(1620,60)">
+    <rect class="frame" width="360" height="600" rx="12"/>
+    <text class="label" x="24" y="30">05 / Confirmacao</text>
+    <rect class="success" x="24" y="86" width="312" height="160" rx="8"/>
+    <text class="t1" x="56" y="142">Agendamento</text>
+    <text class="t1" x="56" y="178">confirmado</text>
+    <text class="small" x="56" y="215">Codigo #AG-1024</text>
+    <rect class="card" x="24" y="282" width="312" height="160" rx="8"/>
+    <text class="txt" x="48" y="318">Servico: Corte masculino</text>
+    <text class="txt" x="48" y="350">Profissional: Joao</text>
+    <text class="txt" x="48" y="382">Data: 22/05/2026</text>
+    <text class="txt" x="48" y="414">Horario: 14:00</text>
+    <rect class="button" x="24" y="486" width="148" height="44" rx="6"/>
+    <text class="white" x="50" y="514">Ver meus</text>
+    <rect class="button2" x="188" y="486" width="148" height="44" rx="6"/>
+    <text class="white" x="216" y="514">Novo</text>
+  </g>
+
+  <g id="frame-06-meus-agendamentos" transform="translate(60,720)">
+    <rect class="frame" width="360" height="600" rx="12"/>
+    <rect class="top" width="360" height="58" rx="12"/>
+    <text class="white" x="22" y="36">Meus agendamentos</text>
+    <text class="label" x="24" y="88">06 / Cliente</text>
+    <rect class="card" x="24" y="120" width="312" height="108" rx="8"/>
+    <text class="t2" x="44" y="152">Corte masculino</text>
+    <text class="small" x="44" y="178">22/05/2026 - 14:00 - Joao</text>
+    <rect class="success" x="44" y="192" width="94" height="24" rx="6"/>
+    <text class="small" x="58" y="209">Confirmado</text>
+    <rect class="card" x="24" y="248" width="312" height="108" rx="8"/>
+    <text class="t2" x="44" y="280">Barba</text>
+    <text class="small" x="44" y="306">23/05/2026 - 10:00 - Maria</text>
+    <rect class="mutedBox" x="44" y="320" width="80" height="24" rx="6"/>
+    <text class="small" x="58" y="337">Pendente</text>
+    <rect class="danger" x="236" y="314" width="76" height="30" rx="6"/>
+    <text class="small" x="254" y="334">Cancelar</text>
+    <rect class="button" x="24" y="496" width="312" height="44" rx="6"/>
+    <text class="white" x="118" y="524">Agendar novo</text>
+  </g>
+
+  <g id="frame-07-dashboard-admin" transform="translate(450,720)">
+    <rect class="frame" width="360" height="600" rx="12"/>
+    <rect class="top" width="360" height="58" rx="12"/>
+    <text class="white" x="22" y="36">Admin</text>
+    <rect class="side" x="0" y="58" width="96" height="542"/>
+    <text class="small" x="16" y="98">Dashboard</text>
+    <text class="small" x="16" y="130">Servicos</text>
+    <text class="small" x="16" y="162">Profissionais</text>
+    <text class="small" x="16" y="194">Agenda</text>
+    <text class="label" x="120" y="92">07 / RF07</text>
+    <text class="t1" x="120" y="130">Dashboard</text>
+    <rect class="card" x="120" y="160" width="200" height="72" rx="8"/>
+    <text class="small" x="138" y="184">Agendamentos hoje</text>
+    <text class="t1" x="138" y="218">12</text>
+    <rect class="card" x="120" y="252" width="200" height="72" rx="8"/>
+    <text class="small" x="138" y="276">Receita prevista</text>
+    <text class="t1" x="138" y="310">R$ 480</text>
+    <rect class="card" x="120" y="344" width="200" height="72" rx="8"/>
+    <text class="small" x="138" y="368">Ocupacao</text>
+    <text class="t1" x="138" y="402">68%</text>
+    <rect class="card" x="120" y="450" width="200" height="88" rx="8"/>
+    <text class="small" x="138" y="478">Proximos horarios</text>
+    <text class="small" x="138" y="504">14:00 Joao - Corte</text>
+  </g>
+
+  <g id="frame-08-crud-servicos" transform="translate(840,720)">
+    <rect class="frame" width="360" height="600" rx="12"/>
+    <rect class="top" width="360" height="58" rx="12"/>
+    <text class="white" x="22" y="36">Admin / Servicos</text>
+    <text class="label" x="24" y="88">08 / RF07 CRUD servicos</text>
+    <text class="t1" x="24" y="128">Servicos</text>
+    <rect class="input" x="24" y="150" width="204" height="38" rx="6"/>
+    <text class="small" x="42" y="174">Buscar servico</text>
+    <rect class="button" x="244" y="150" width="92" height="38" rx="6"/>
+    <text class="white" x="258" y="174">Novo</text>
+    <rect class="card" x="24" y="218" width="312" height="250" rx="8"/>
+    <text class="small" x="42" y="248">Nome</text>
+    <text class="small" x="168" y="248">Preco</text>
+    <text class="small" x="246" y="248">Acoes</text>
+    <line x1="42" y1="260" x2="316" y2="260" stroke="#cbd5e1"/>
+    <text class="txt" x="42" y="294">Corte</text>
+    <text class="txt" x="168" y="294">35</text>
+    <text class="small" x="246" y="294">Editar</text>
+    <text class="txt" x="42" y="336">Barba</text>
+    <text class="txt" x="168" y="336">25</text>
+    <text class="small" x="246" y="336">Editar</text>
+    <rect class="card" x="24" y="498" width="312" height="58" rx="8"/>
+    <text class="small" x="44" y="532">Drawer/modal: nome, descricao, duracao, preco</text>
+  </g>
+
+  <g id="frame-09-crud-profissionais" transform="translate(1230,720)">
+    <rect class="frame" width="360" height="600" rx="12"/>
+    <rect class="top" width="360" height="58" rx="12"/>
+    <text class="white" x="22" y="36">Admin / Profissionais</text>
+    <text class="label" x="24" y="88">09 / RF07 CRUD profissionais</text>
+    <text class="t1" x="24" y="128">Profissionais</text>
+    <rect class="button" x="228" y="102" width="108" height="38" rx="6"/>
+    <text class="white" x="252" y="126">Novo</text>
+    <rect class="card" x="24" y="164" width="312" height="116" rx="8"/>
+    <text class="t2" x="44" y="198">Joao Silva</text>
+    <text class="small" x="44" y="223">Barbeiro - Corte, Barba</text>
+    <rect class="success" x="44" y="238" width="62" height="24" rx="6"/>
+    <text class="small" x="58" y="255">Ativo</text>
+    <text class="small" x="250" y="255">Editar</text>
+    <rect class="card" x="24" y="300" width="312" height="116" rx="8"/>
+    <text class="t2" x="44" y="334">Maria Lima</text>
+    <text class="small" x="44" y="359">Barbeira - Corte</text>
+    <rect class="success" x="44" y="374" width="62" height="24" rx="6"/>
+    <text class="small" x="58" y="391">Ativo</text>
+    <text class="small" x="250" y="391">Editar</text>
+    <rect class="card" x="24" y="470" width="312" height="74" rx="8"/>
+    <text class="small" x="44" y="500">Campos: usuario, servicos, status</text>
+    <text class="small" x="44" y="524">Relacao com grade de disponibilidade</text>
+  </g>
+
+  <g id="frame-10-grade-disponibilidade" transform="translate(1620,720)">
+    <rect class="frame" width="360" height="600" rx="12"/>
+    <rect class="top" width="360" height="58" rx="12"/>
+    <text class="white" x="22" y="36">Admin / Disponibilidade</text>
+    <text class="label" x="24" y="88">10 / RF07 grade disponibilidade</text>
+    <text class="t1" x="24" y="128">Grade</text>
+    <rect class="input" x="24" y="150" width="150" height="36" rx="6"/>
+    <text class="small" x="42" y="173">Profissional</text>
+    <rect class="input" x="186" y="150" width="150" height="36" rx="6"/>
+    <text class="small" x="204" y="173">Data</text>
+    <text class="small" x="24" y="218">Joao - 22/05/2026</text>
+    <rect class="slotFree" x="24" y="240" width="96" height="48" rx="6"/>
+    <text class="small" x="46" y="269">09:00 livre</text>
+    <rect class="slotBusy" x="132" y="240" width="96" height="48" rx="6"/>
+    <text class="small" x="150" y="269">10:00 ocupado</text>
+    <rect class="slotFree" x="240" y="240" width="96" height="48" rx="6"/>
+    <text class="small" x="262" y="269">11:00 livre</text>
+    <rect class="slotFree" x="24" y="304" width="96" height="48" rx="6"/>
+    <text class="small" x="46" y="333">14:00 livre</text>
+    <rect class="slotBusy" x="132" y="304" width="96" height="48" rx="6"/>
+    <text class="small" x="150" y="333">15:00 ocupado</text>
+    <rect class="slotFree" x="240" y="304" width="96" height="48" rx="6"/>
+    <text class="small" x="262" y="333">16:00 livre</text>
+    <rect class="button" x="24" y="486" width="312" height="44" rx="6"/>
+    <text class="white" x="108" y="514">Salvar alteracoes</text>
+  </g>
+</svg>
