@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg2://technovinho:technovinho@localhost:5432/technovinho"
     jwt_secret: str = "dev-secret-change-me"
     jwt_expire_hours: int = 24
+    cancel_min_hours: int = 24
     cors_origins: str = "http://localhost:8501,http://localhost:5173"
 
     @property

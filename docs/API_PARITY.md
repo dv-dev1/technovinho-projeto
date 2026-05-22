@@ -9,9 +9,15 @@ Referência: `api-agendamento-backend` (Express + MongoDB).
 | `GET /api/auth/me` | `GET /api/auth/me` | JWT | ✅ |
 | `GET /api/services` | `GET /api/services` | JWT | ✅ (lista vazia até S2) |
 | `POST /api/services` | `POST /api/services` | admin | ✅ básico |
-| `GET /api/professionals` | `GET /api/professionals` | JWT | ✅ stub |
-| `GET /api/appointments` | `GET /api/appointments` | JWT | ✅ stub |
-| `GET /api/availability` | `GET /api/availability` | JWT | ✅ stub |
+| `GET /api/professionals` | `GET /api/professionals` | JWT | ✅ join user |
+| `POST /api/professionals` | `POST /api/professionals` | admin | ✅ |
+| `GET /api/professionals/:id` | `GET /api/professionals/{id}` | JWT | ✅ |
+| `GET /api/appointments` | `GET /api/appointments` | JWT | ✅ filtros `status`, `mine` |
+| `POST /api/appointments` | `POST /api/appointments` | client | ✅ |
+| cancel | `PATCH /api/appointments/{id}/cancel` | client/admin | ✅ prazo `CANCEL_MIN_HOURS` |
+| `GET /api/availability/:professionalId` | `GET /api/professionals/{id}/availability` | JWT | ✅ |
+| `POST availability` | `POST /api/professionals/{id}/availability` | admin | ✅ |
+| `DELETE availability` | `DELETE /api/availability/{id}` | admin | ✅ |
 
 ## Diferenças intencionais (APS)
 

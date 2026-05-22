@@ -1,30 +1,32 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_current_user
+from app.core.deps import get_current_user, require_roles
 from app.db.session import get_db
-from app.models.availability import Availability
-from app.models.user import User
+from app.models.user import User, UserRole
+from app.schemas.availability import AvailabilityOut
+from app.services import availability_service
 
 router = APIRouter(prefix="/api/availability", tags=["availability"])
 
 
-@router.get("/")
-def list_availability(
+@router.get("/", response_model=list[AvailabilityOut])
+def list_all_availability(
     _: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
-    rows = db.scalars(select(Availability)).all()
-    return [
-        {
-            "id": r.id,
-            "professional_id": r.professional_id,
-            "day_of_week": r.day_of_week,
-            "start_time": r.start_time.isoformat(),
-            "end_time": r.end_time.isoformat(),
-        }
-        for r in rows
-    ]
+    return availability_service.list_all(db)
+
+
+@router.delete("/{availability_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_availability(
+    availability_id: int,
+    _: Annotated[User, Depends(require_roles(UserRole.admin))],
+    db: Annotated[Session, Depends(get_db)],
+):
+    try:
+        availability_service.delete_slot(db, availability_id)
+    except availability_service.AvailabilityNotFoundError:
+        raise HTTPException(status_code=404, detail="Disponibilidade não encontrada") from None
