@@ -1,0 +1,5 @@
+﻿Dashboard admin smoke result
+appointments_today=2
+estimated_revenue=35.0
+active_professionals=1
+notes=Revenue ignores cancelled appointments; screenshot uses seeded local SQLite data.
