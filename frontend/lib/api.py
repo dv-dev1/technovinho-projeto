@@ -49,8 +49,16 @@ def me(token: str) -> dict:
     return _request("GET", "/api/auth/me", token=token)
 
 
+def list_services(token: str) -> list:
+    return _request("GET", "/api/services", token=token) or []
+
+
 def list_professionals(token: str) -> list:
     return _request("GET", "/api/professionals", token=token) or []
+
+
+def list_active_professionals(token: str) -> list:
+    return _request("GET", "/api/professionals", token=token, params={"active_only": "true"}) or []
 
 
 def create_professional(token: str, payload: dict) -> dict:
