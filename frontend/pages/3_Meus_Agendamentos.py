@@ -2,7 +2,7 @@ from datetime import datetime
 
 import streamlit as st
 
-from lib import api
+from lib import api, ui
 
 STATUS_LABELS = {
     "pending": "Pendente",
@@ -10,6 +10,8 @@ STATUS_LABELS = {
     "cancelled": "Cancelado",
     "done": "Concluído",
 }
+
+ui.sidebar_nav()
 
 
 def fmt_br(iso: str) -> str:
@@ -20,13 +22,9 @@ def fmt_br(iso: str) -> str:
         return iso
 
 
-st.title("Meus agendamentos")
+st.title("📋 Meus agendamentos")
 
-if not st.session_state.get("token"):
-    st.warning("Faça login na página inicial.")
-    st.stop()
-
-token = st.session_state.token
+token = ui.require_auth()
 role = st.session_state.get("user", {}).get("role")
 
 status_filter = st.selectbox(
@@ -36,13 +34,14 @@ status_filter = st.selectbox(
 )
 
 try:
-    rows = api.list_appointments(
-        token,
-        status=status_filter,
-        mine=(role == "client"),
-    )
+    with st.spinner("Carregando agendamentos..."):
+        rows = api.list_appointments(
+            token,
+            status=status_filter,
+            mine=(role == "client"),
+        )
 except api.ApiError as err:
-    st.error(err.detail)
+    ui.show_api_error(err)
     st.stop()
 
 if not rows:
@@ -61,8 +60,9 @@ for row in rows:
             confirm = st.checkbox("Confirmo cancelamento", key=f"confirm_{row['id']}")
             if st.button("Cancelar agendamento", key=f"cancel_{row['id']}", disabled=not confirm):
                 try:
-                    api.cancel_appointment(token, row["id"])
+                    with st.spinner("Cancelando agendamento..."):
+                        api.cancel_appointment(token, row["id"])
                     st.success("Agendamento cancelado.")
                     st.rerun()
                 except api.ApiError as err:
-                    st.error(err.detail)
+                    ui.show_api_error(err)
