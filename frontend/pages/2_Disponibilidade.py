@@ -2,20 +2,21 @@ from datetime import time
 
 import streamlit as st
 
-from lib import api, auth
+from lib import api, ui
 
 DAY_LABELS = ["Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado", "Domingo"]
 
+ui.sidebar_nav()
+
 st.title("Grade semanal - disponibilidade")
 
-auth.require_auth(["admin"])
-
-token = st.session_state.token
+token = ui.require_auth(roles=["admin"])
 
 try:
-    professionals = api.list_professionals(token)
+    with st.spinner("Carregando profissionais..."):
+        professionals = api.list_professionals(token)
 except api.ApiError as err:
-    st.error(err.detail)
+    ui.show_api_error(err)
     st.stop()
 
 if not professionals:
@@ -27,9 +28,10 @@ choice = st.selectbox("Profissional", list(options.keys()))
 professional_id = options[choice]
 
 try:
-    slots = api.list_availability(token, professional_id)
+    with st.spinner("Carregando disponibilidade..."):
+        slots = api.list_availability(token, professional_id)
 except api.ApiError as err:
-    st.error(err.detail)
+    ui.show_api_error(err)
     st.stop()
 
 if slots:
@@ -58,11 +60,12 @@ if slots:
     if to_delete and st.button("Excluir selecionada"):
         slot_id = int(to_delete.split("#")[1].split(" ")[0])
         try:
-            api.delete_availability(token, slot_id)
+            with st.spinner("Excluindo faixa..."):
+                api.delete_availability(token, slot_id)
             st.success("Faixa removida.")
             st.rerun()
         except api.ApiError as err:
-            st.error(err.detail)
+            ui.show_api_error(err)
 else:
     st.caption("Nenhuma faixa cadastrada.")
 
@@ -81,16 +84,17 @@ with st.form("add_slot"):
             st.error("Fim deve ser depois do inicio.")
         else:
             try:
-                api.create_availability(
-                    token,
-                    professional_id,
-                    {
-                        "day_of_week": day,
-                        "start_time": start.strftime("%H:%M:%S"),
-                        "end_time": end.strftime("%H:%M:%S"),
-                    },
-                )
+                with st.spinner("Salvando disponibilidade..."):
+                    api.create_availability(
+                        token,
+                        professional_id,
+                        {
+                            "day_of_week": day,
+                            "start_time": start.strftime("%H:%M:%S"),
+                            "end_time": end.strftime("%H:%M:%S"),
+                        },
+                    )
                 st.success("Disponibilidade salva.")
                 st.rerun()
             except api.ApiError as err:
-                st.error(err.detail)
+                ui.show_api_error(err)

@@ -1,6 +1,6 @@
 import unittest
 
-from frontend.lib import auth
+from frontend.lib import auth, ui
 
 
 class FakeStop(Exception):
@@ -88,16 +88,16 @@ class AuthHelperTests(unittest.TestCase):
         st = FakeStreamlit()
 
         with self.assertRaises(FakeStop):
-            auth.require_auth(st_module=st)
+            ui.require_auth(st_module=st)
 
-        self.assertEqual(["Faca login para acessar esta pagina."], st.warnings)
+        self.assertEqual(["Faca login na pagina inicial para continuar."], st.warnings)
 
     def test_require_auth_blocks_wrong_role(self):
         st = FakeStreamlit()
         st.session_state.update({"token": "token-123", "user_role": "client"})
 
         with self.assertRaises(FakeStop):
-            auth.require_auth(["admin"], st_module=st)
+            ui.require_auth(["admin"], st_module=st)
 
         self.assertEqual(["Acesso restrito para este perfil."], st.warnings)
 

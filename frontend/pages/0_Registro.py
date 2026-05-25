@@ -1,6 +1,6 @@
 import streamlit as st
 
-from lib import api, auth
+from lib import api, auth, ui
 
 ROLE_OPTIONS = {
     "Cliente": "client",
@@ -12,6 +12,7 @@ st.title("Cadastro")
 st.caption("Crie uma conta para acessar o TECHNOVINHO.")
 
 auth.ensure_session_defaults()
+ui.sidebar_nav()
 
 with st.form("register"):
     name = st.text_input("Nome")
@@ -43,4 +44,4 @@ with st.form("register"):
                 st.success("Cadastro criado. Volte para a pagina inicial para fazer login.")
                 st.page_link("app.py", label="Ir para login")
             except api.ApiError as err:
-                st.error(err.detail)
+                ui.show_api_error(err)

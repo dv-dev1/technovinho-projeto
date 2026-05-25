@@ -1,5 +1,4 @@
 import re
-from collections.abc import Iterable
 from typing import Any
 
 import streamlit as st
@@ -61,16 +60,3 @@ def current_role(st_module=st) -> str | None:
         return role
     user = st_module.session_state.get("user") or {}
     return user.get("role")
-
-
-def require_auth(roles: Iterable[str] | None = None, *, st_module=st) -> bool:
-    if not st_module.session_state.get("token"):
-        st_module.warning("Faca login para acessar esta pagina.")
-        st_module.stop()
-
-    allowed_roles = list(roles or [])
-    if allowed_roles and current_role(st_module) not in allowed_roles:
-        st_module.warning("Acesso restrito para este perfil.")
-        st_module.stop()
-
-    return True
