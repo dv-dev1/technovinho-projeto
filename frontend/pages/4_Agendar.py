@@ -35,7 +35,7 @@ def professional_label(professional: dict) -> str:
     return f"{professional['name']} - {specialty}"
 
 
-st.title("📅 Agendar horario")
+st.title("Agendar horario")
 
 token = ui.require_auth(roles=["client"])
 
