@@ -1,6 +1,6 @@
 import streamlit as st
 
-from lib import api
+from lib import api, ui
 
 st.set_page_config(page_title="TECHNOVINHO", page_icon="✂️", layout="wide")
 
@@ -8,6 +8,8 @@ if "token" not in st.session_state:
     st.session_state.token = None
 if "user" not in st.session_state:
     st.session_state.user = None
+
+ui.sidebar_nav()
 
 st.title("TECHNOVINHO")
 st.caption("Gestão de barbearias — APS")
@@ -27,19 +29,20 @@ with st.sidebar:
             password = st.text_input("Senha", type="password")
             if st.form_submit_button("Entrar"):
                 try:
-                    data = api.login(email, password)
+                    with st.spinner("Entrando..."):
+                        data = api.login(email, password)
+                        st.session_state.user = api.me(data["access_token"])
                     st.session_state.token = data["access_token"]
-                    st.session_state.user = api.me(st.session_state.token)
                     st.rerun()
                 except api.ApiError as err:
-                    st.error(err.detail)
+                    ui.show_api_error(err)
 
 if st.session_state.token:
     if st.session_state.user.get("role") == "admin":
-        st.success("Admin: **Profissionais**, **Disponibilidade**.")
+        st.success("Admin: use **👥 Profissionais** e **🗓️ Disponibilidade**.")
     elif st.session_state.user.get("role") == "client":
-        st.success("Cliente: abra **Meus agendamentos**.")
+        st.success("Cliente: use **📅 Agendar** e **📋 Meus agendamentos**.")
     else:
         st.info("Use o menu conforme seu perfil.")
 else:
-    st.info("Entre com usuário admin para gerenciar profissionais e disponibilidade.")
+    st.info("Entre para acessar as funcionalidades do TECHNOVINHO.")

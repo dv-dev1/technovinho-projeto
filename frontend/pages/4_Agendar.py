@@ -2,7 +2,7 @@ from datetime import date, datetime
 
 import streamlit as st
 
-from lib import api, scheduling
+from lib import api, scheduling, ui
 
 STATUS_LABELS = {
     "pending": "Pendente",
@@ -10,6 +10,8 @@ STATUS_LABELS = {
     "cancelled": "Cancelado",
     "done": "Concluido",
 }
+
+ui.sidebar_nav()
 
 
 def fmt_money(value: float) -> str:
@@ -33,17 +35,9 @@ def professional_label(professional: dict) -> str:
     return f"{professional['name']} - {specialty}"
 
 
-st.title("Agendar horario")
+st.title("📅 Agendar horario")
 
-if not st.session_state.get("token"):
-    st.warning("Faca login na pagina inicial para agendar.")
-    st.stop()
-
-if st.session_state.get("user", {}).get("role") != "client":
-    st.warning("Agendamentos devem ser criados por usuarios cliente.")
-    st.stop()
-
-token = st.session_state.token
+token = ui.require_auth(roles=["client"])
 
 confirmation = st.session_state.get("appointment_confirmation")
 if confirmation:
@@ -63,10 +57,11 @@ if confirmation:
     st.stop()
 
 try:
-    services = [service for service in api.list_services(token) if service.get("active")]
-    professionals = api.list_active_professionals(token)
+    with st.spinner("Carregando opcoes de agendamento..."):
+        services = [service for service in api.list_services(token) if service.get("active")]
+        professionals = api.list_active_professionals(token)
 except api.ApiError as err:
-    st.error(err.detail)
+    ui.show_api_error(err)
     st.stop()
 
 if not services:
@@ -99,9 +94,10 @@ if scheduling.is_past_date(selected_date):
     st.stop()
 
 try:
-    availability = api.list_availability(token, selected_professional["id"])
+    with st.spinner("Carregando horarios disponiveis..."):
+        availability = api.list_availability(token, selected_professional["id"])
 except api.ApiError as err:
-    st.error(err.detail)
+    ui.show_api_error(err)
     st.stop()
 
 day_availability = scheduling.availability_for_date(availability, selected_date)
@@ -136,8 +132,9 @@ with st.container(border=True):
             "notes": notes.strip() or None,
         }
         try:
-            appointment = api.create_appointment(token, payload)
+            with st.spinner("Confirmando agendamento..."):
+                appointment = api.create_appointment(token, payload)
             st.session_state.appointment_confirmation = appointment
             st.rerun()
         except api.ApiError as err:
-            st.error(err.detail)
+            ui.show_api_error(err)
