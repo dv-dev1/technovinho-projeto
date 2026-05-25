@@ -2,7 +2,7 @@ from datetime import date, datetime
 
 import streamlit as st
 
-from lib import api, scheduling
+from lib import api, auth, scheduling
 
 STATUS_LABELS = {
     "pending": "Pendente",
@@ -35,13 +35,7 @@ def professional_label(professional: dict) -> str:
 
 st.title("Agendar horario")
 
-if not st.session_state.get("token"):
-    st.warning("Faca login na pagina inicial para agendar.")
-    st.stop()
-
-if st.session_state.get("user", {}).get("role") != "client":
-    st.warning("Agendamentos devem ser criados por usuarios cliente.")
-    st.stop()
+auth.require_auth(["client"])
 
 token = st.session_state.token
 

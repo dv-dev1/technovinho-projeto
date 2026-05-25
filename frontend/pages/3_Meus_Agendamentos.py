@@ -2,13 +2,13 @@ from datetime import datetime
 
 import streamlit as st
 
-from lib import api
+from lib import api, auth
 
 STATUS_LABELS = {
     "pending": "Pendente",
     "confirmed": "Confirmado",
     "cancelled": "Cancelado",
-    "done": "Concluído",
+    "done": "Concluido",
 }
 
 
@@ -22,12 +22,10 @@ def fmt_br(iso: str) -> str:
 
 st.title("Meus agendamentos")
 
-if not st.session_state.get("token"):
-    st.warning("Faça login na página inicial.")
-    st.stop()
+auth.require_auth()
 
 token = st.session_state.token
-role = st.session_state.get("user", {}).get("role")
+role = auth.current_role()
 
 status_filter = st.selectbox(
     "Status",
@@ -51,7 +49,9 @@ if not rows:
 
 for row in rows:
     with st.container(border=True):
-        st.markdown(f"**{row.get('service_name', 'Serviço')}** — {row.get('professional_name', 'Profissional')}")
+        st.markdown(
+            f"**{row.get('service_name', 'Servico')}** - {row.get('professional_name', 'Profissional')}"
+        )
         st.caption(f"Quando: {fmt_br(row['scheduled_at'])}")
         st.write(f"Status: **{STATUS_LABELS.get(row['status'], row['status'])}**")
         if row.get("notes"):
