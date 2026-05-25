@@ -1,19 +1,13 @@
 import streamlit as st
 
-from lib import api, dashboard
+from lib import api, dashboard, ui
+
+ui.sidebar_nav()
 
 st.title("Dashboard admin")
 st.caption("Visao do dia")
 
-if not st.session_state.get("token"):
-    st.warning("Faca login na pagina inicial.")
-    st.stop()
-
-if st.session_state.get("user", {}).get("role") != "admin":
-    st.warning("Acesso restrito para administradores.")
-    st.stop()
-
-token = st.session_state.token
+token = ui.require_auth(["admin"])
 
 with st.spinner("Carregando dashboard..."):
     try:
@@ -21,7 +15,7 @@ with st.spinner("Carregando dashboard..."):
         services = api.list_services(token)
         professionals = api.list_professionals(token)
     except api.ApiError as err:
-        st.error(err.detail)
+        ui.show_api_error(err)
         st.stop()
 
 today_rows = dashboard.today_appointments(appointments)

@@ -35,7 +35,7 @@ with st.sidebar:
 
 if st.session_state.token:
     if st.session_state.user_role == "admin":
-        st.success("Admin: use Profissionais e Disponibilidade.")
+        st.success("Admin: use Dashboard admin, Profissionais e Disponibilidade.")
     elif st.session_state.user_role == "client":
         st.success("Cliente: use Agendar e Meus agendamentos.")
     else:
