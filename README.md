@@ -41,6 +41,14 @@ alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
+## Testes automaticos de interface
+
+Os testes de interface Streamlit usam `pytest` com `streamlit.testing.v1.AppTest`.
+
+```bash
+pip install -r frontend/requirements.txt -r requirements-dev.txt
+pytest tests/ui
+```
 ## Auth (curl)
 
 ```bash
