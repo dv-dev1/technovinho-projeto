@@ -1,19 +1,18 @@
 import streamlit as st
 
-from lib import api
+from lib import api, ui
+
+ui.sidebar_nav()
 
 st.title("Profissionais")
 
-if not st.session_state.get("token") or st.session_state.get("user", {}).get("role") != "admin":
-    st.warning("Faça login na página inicial.")
-    st.stop()
-
-token = st.session_state.token
+token = ui.require_auth(roles=["admin"])
 
 try:
-    professionals = api.list_professionals(token)
+    with st.spinner("Carregando profissionais..."):
+        professionals = api.list_professionals(token)
 except api.ApiError as err:
-    st.error(err.detail)
+    ui.show_api_error(err)
     st.stop()
 
 if professionals:
@@ -23,8 +22,8 @@ if professionals:
                 "ID": p["id"],
                 "Nome": p["name"],
                 "Email": p["email"],
-                "Especialidade": p.get("specialty") or "—",
-                "Ativo": "Sim" if p["active"] else "Não",
+                "Especialidade": p.get("specialty") or "-",
+                "Ativo": "Sim" if p["active"] else "Nao",
             }
             for p in professionals
         ],
@@ -37,16 +36,17 @@ st.divider()
 st.subheader("Novo profissional")
 
 with st.form("create_professional"):
-    user_id = st.number_input("user_id (usuário com role barber)", min_value=1, step=1)
+    user_id = st.number_input("user_id (usuario com role barber)", min_value=1, step=1)
     specialty = st.text_input("Especialidade")
     active = st.checkbox("Ativo", value=True)
     if st.form_submit_button("Criar"):
         try:
-            api.create_professional(
-                token,
-                {"user_id": int(user_id), "specialty": specialty or None, "active": active},
-            )
+            with st.spinner("Criando profissional..."):
+                api.create_professional(
+                    token,
+                    {"user_id": int(user_id), "specialty": specialty or None, "active": active},
+                )
             st.success("Profissional criado.")
             st.rerun()
         except api.ApiError as err:
-            st.error(err.detail)
+            ui.show_api_error(err)

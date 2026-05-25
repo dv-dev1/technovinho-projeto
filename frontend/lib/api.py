@@ -18,10 +18,22 @@ def _headers(token: str | None) -> dict:
     return {"Authorization": f"Bearer {token}"}
 
 
+def _friendly_detail(status_code: int, detail: object) -> str:
+    if status_code == 401:
+        return "Email ou senha invalidos."
+    if status_code == 409:
+        return "Email ja cadastrado."
+    if status_code == 422:
+        return "Dados invalidos. Confira os campos informados."
+    if isinstance(detail, list):
+        return "Dados invalidos. Confira os campos informados."
+    return str(detail)
+
+
 def _request(method: str, path: str, *, token: str | None = None, **kwargs):
     url = f"{API_BASE_URL.rstrip('/')}{path}"
     try:
-        response = requests.request(method, url, headers=_headers(token), timeout=15, **kwargs)
+        response = requests.request(method, url, headers=_headers(token), timeout=10, **kwargs)
     except requests.exceptions.ConnectionError as exc:
         raise ApiError(0, f"API offline em {API_BASE_URL}") from exc
 
@@ -31,9 +43,7 @@ def _request(method: str, path: str, *, token: str | None = None, **kwargs):
             detail = response.json().get("detail", detail)
         except Exception:
             pass
-        if isinstance(detail, list):
-            detail = str(detail)
-        raise ApiError(response.status_code, str(detail))
+        raise ApiError(response.status_code, _friendly_detail(response.status_code, detail))
     if response.status_code == 204:
         return None
     if not response.content:
@@ -43,6 +53,10 @@ def _request(method: str, path: str, *, token: str | None = None, **kwargs):
 
 def login(email: str, password: str) -> dict:
     return _request("POST", "/api/auth/login", json={"email": email, "password": password})
+
+
+def register(payload: dict) -> dict:
+    return _request("POST", "/api/auth/register", json=payload)
 
 
 def me(token: str) -> dict:
