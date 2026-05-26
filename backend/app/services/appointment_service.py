@@ -96,7 +96,12 @@ def create_appointment(db: Session, *, current_user: User, data: AppointmentCrea
     if scheduled <= now:
         raise InvalidAppointmentStateError("Agendamento deve ser no futuro")
 
-    if not availability_service.is_slot_available(db, data.professional_id, scheduled):
+    if not availability_service.is_slot_available(
+        db,
+        data.professional_id,
+        scheduled,
+        duration_minutes=service.duration,
+    ):
         raise SlotUnavailableError()
 
     appointment = Appointment(

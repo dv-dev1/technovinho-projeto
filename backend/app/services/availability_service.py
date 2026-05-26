@@ -1,4 +1,4 @@
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
@@ -81,21 +81,59 @@ def delete_slot(db: Session, availability_id: int) -> None:
     db.commit()
 
 
-def is_slot_available(db: Session, professional_id: int, scheduled_at: datetime) -> bool:
+def is_slot_available(
+    db: Session,
+    professional_id: int,
+    scheduled_at: datetime,
+    *,
+    duration_minutes: int,
+) -> bool:
+    from app.models.appointment import Appointment, AppointmentStatus
+
     if scheduled_at.tzinfo is not None:
         scheduled_at = scheduled_at.replace(tzinfo=None)
 
     day = scheduled_at.weekday()  # 0=Segunda (Python)
-    slot_time = scheduled_at.time()
+    slot_start = scheduled_at.time()
+    slot_end_dt = scheduled_at + timedelta(minutes=duration_minutes)
+
+    if slot_end_dt.date() != scheduled_at.date():
+        return False
+
+    slot_end = slot_end_dt.time()
 
     rows = db.scalars(
         select(Availability).where(
             and_(
                 Availability.professional_id == professional_id,
                 Availability.day_of_week == day,
-                Availability.start_time <= slot_time,
-                Availability.end_time > slot_time,
+                Availability.start_time <= slot_start,
+                Availability.end_time >= slot_end,
             )
         )
     ).all()
-    return len(rows) > 0
+    if not rows:
+        return False
+
+    active_statuses = (AppointmentStatus.pending, AppointmentStatus.confirmed)
+    appointments = db.scalars(
+        select(Appointment).where(
+            and_(
+                Appointment.professional_id == professional_id,
+                Appointment.status.in_(active_statuses),
+            )
+        )
+    ).all()
+
+    for appointment in appointments:
+        existing_start = appointment.scheduled_at
+        if existing_start.tzinfo is not None:
+            existing_start = existing_start.replace(tzinfo=None)
+
+        service_duration = appointment.service.duration
+        existing_end = existing_start + timedelta(minutes=service_duration)
+
+        if scheduled_at < existing_end and existing_start < slot_end_dt:
+            return False
+
+    return True
