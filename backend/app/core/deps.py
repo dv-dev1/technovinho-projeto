@@ -18,7 +18,7 @@ def get_current_user(
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Não autorizado: token não fornecido",
+            detail="Not authenticated",
         )
     try:
         payload = decode_access_token(credentials.credentials)
