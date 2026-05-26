@@ -39,7 +39,7 @@ st.title("Agendar horario")
 
 token = ui.require_auth(roles=["client"])
 
-confirmation = st.session_state.get("appointment_confirmation")
+confirmation = st.session_state.get("last_booking")
 if confirmation:
     with st.container(border=True):
         st.success("Agendamento solicitado.")
@@ -50,9 +50,9 @@ if confirmation:
         st.write(f"**Quando:** {fmt_br(confirmation['scheduled_at'])}")
         if confirmation.get("notes"):
             st.write(f"**Observacoes:** {confirmation['notes']}")
-        st.page_link("pages/3_Meus_Agendamentos.py", label="Abrir Meus agendamentos")
+        st.page_link("pages/3_Meus_Agendamentos.py", label="Ver meus agendamentos")
         if st.button("Novo agendamento"):
-            st.session_state.appointment_confirmation = None
+            st.session_state.last_booking = None
             st.rerun()
     st.stop()
 
@@ -137,7 +137,7 @@ with st.container(border=True):
         try:
             with st.spinner("Confirmando agendamento..."):
                 appointment = api.create_appointment(token, payload)
-            st.session_state.appointment_confirmation = appointment
+            st.session_state.last_booking = appointment
             st.rerun()
         except api.ApiError as err:
             ui.show_api_error(err)
