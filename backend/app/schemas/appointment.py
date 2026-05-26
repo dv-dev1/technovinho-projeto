@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 
 from pydantic import BaseModel, Field
 
@@ -20,6 +21,7 @@ class AppointmentOut(BaseModel):
     professional_name: str | None = None
     service_id: int
     service_name: str | None = None
+    service_price: Decimal | None = None
     scheduled_at: datetime
     status: AppointmentStatus
     notes: str | None = None

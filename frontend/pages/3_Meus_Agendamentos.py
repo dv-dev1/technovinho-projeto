@@ -68,3 +68,12 @@ for row in rows:
                     st.rerun()
                 except api.ApiError as err:
                     ui.show_api_error(err)
+        if role == "admin" and row["status"] not in ("cancelled", "done"):
+            if st.button("Marcar como concluido", key=f"complete_{row['id']}"):
+                try:
+                    with st.spinner("Concluindo atendimento..."):
+                        api.complete_appointment(token, row["id"])
+                    st.success("Atendimento concluido.")
+                    st.rerun()
+                except api.ApiError as err:
+                    ui.show_api_error(err)

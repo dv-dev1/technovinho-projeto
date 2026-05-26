@@ -58,6 +58,7 @@ def _to_out(row: Appointment) -> dict:
         "professional_name": prof_user.name if prof_user else None,
         "service_id": row.service_id,
         "service_name": row.service.name if row.service else None,
+        "service_price": row.service.price if row.service else None,
         "scheduled_at": row.scheduled_at,
         "status": row.status,
         "notes": row.notes,
@@ -199,5 +200,22 @@ def cancel_appointment(db: Session, *, appointment_id: int, current_user: User) 
     row.status = AppointmentStatus.cancelled
     db.commit()
     db.refresh(row)
+    row = db.scalar(_base_query().where(Appointment.id == appointment_id))
+    return _to_out(row)
+
+
+def complete_appointment(db: Session, *, appointment_id: int) -> dict:
+    row = db.scalar(_base_query().where(Appointment.id == appointment_id))
+    if row is None:
+        raise AppointmentNotFoundError()
+    if row.status == AppointmentStatus.cancelled:
+        raise InvalidAppointmentStateError("Agendamento cancelado nao pode ser concluido")
+    if row.status == AppointmentStatus.done:
+        raise InvalidAppointmentStateError("Agendamento ja concluido")
+    if _as_utc(row.scheduled_at) > datetime.now(timezone.utc):
+        raise InvalidAppointmentStateError("Atendimento futuro nao pode ser concluido")
+
+    row.status = AppointmentStatus.done
+    db.commit()
     row = db.scalar(_base_query().where(Appointment.id == appointment_id))
     return _to_out(row)

@@ -15,6 +15,8 @@ Referência: `api-agendamento-backend` (Express + MongoDB).
 | `GET /api/appointments` | `GET /api/appointments` | JWT | ✅ filtros `status`, `mine` |
 | `POST /api/appointments` | `POST /api/appointments` | client | ✅ |
 | cancel | `PATCH /api/appointments/{id}/cancel` | client/admin | ✅ prazo `CANCEL_MIN_HOURS` |
+| historico | `GET /api/appointments?status=done` | JWT | ✅ somente concluidos |
+| concluir atendimento | `PATCH /api/appointments/{id}/complete` | admin | ✅ apos horario |
 | `GET /api/availability/:professionalId` | `GET /api/professionals/{id}/availability` | JWT | ✅ |
 | `POST availability` | `POST /api/professionals/{id}/availability` | admin | ✅ |
 | `DELETE availability` | `DELETE /api/availability/{id}` | admin | ✅ |

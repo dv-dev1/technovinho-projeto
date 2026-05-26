@@ -22,7 +22,7 @@ from app.core.security import hash_password  # noqa: E402
 from app.db.base import Base  # noqa: E402
 from app.db.session import SessionLocal, engine  # noqa: E402
 from app.main import app  # noqa: E402
-from app.models.appointment import Appointment  # noqa: E402
+from app.models.appointment import Appointment, AppointmentStatus  # noqa: E402
 from app.models.availability import Availability  # noqa: E402
 from app.models.professional import Professional  # noqa: E402
 from app.models.service import Service  # noqa: E402
@@ -121,6 +121,21 @@ class AppointmentFlowIntegrationTests(unittest.TestCase):
             "notes": "Preferencia por maquina 2",
         }
 
+    def _insert_past_appointment(self):
+        with SessionLocal() as db:
+            client = db.scalar(select(User).where(User.email == "cliente@test.com"))
+            row = Appointment(
+                client_id=client.id,
+                professional_id=self.professional_id,
+                service_id=self.service_id,
+                scheduled_at=datetime.now(timezone.utc) - timedelta(hours=1),
+                status=AppointmentStatus.confirmed,
+            )
+            db.add(row)
+            db.commit()
+            db.refresh(row)
+            return row.id
+
     def test_client_can_create_appointment_and_row_is_persisted(self):
         token = self._login_token()
         create_response = self.client.post(
@@ -209,6 +224,39 @@ class AppointmentFlowIntegrationTests(unittest.TestCase):
 
         self.assertEqual(200, response.status_code)
         self.assertEqual("cancelled", response.json()["status"])
+
+    def test_admin_marks_past_appointment_done_and_client_sees_history(self):
+        appointment_id = self._insert_past_appointment()
+
+        completed = self.client.patch(
+            f"/api/appointments/{appointment_id}/complete",
+            headers={"Authorization": f"Bearer {self._admin_token()}"},
+        )
+        history = self.client.get(
+            "/api/appointments",
+            params={"status": "done", "mine": "true"},
+            headers={"Authorization": f"Bearer {self._login_token()}"},
+        )
+
+        self.assertEqual(200, completed.status_code)
+        self.assertEqual("done", completed.json()["status"])
+        self.assertEqual([appointment_id], [row["id"] for row in history.json()])
+        self.assertEqual("35.00", history.json()[0]["service_price"])
+
+    def test_future_appointment_cannot_be_completed(self):
+        created = self.client.post(
+            "/api/appointments",
+            headers={"Authorization": f"Bearer {self._login_token()}"},
+            json=self._appointment_payload(),
+        )
+
+        response = self.client.patch(
+            f"/api/appointments/{created.json()['id']}/complete",
+            headers={"Authorization": f"Bearer {self._admin_token()}"},
+        )
+
+        self.assertEqual(400, response.status_code)
+        self.assertIn("futuro", response.json()["detail"].lower())
 
 
 if __name__ == "__main__":

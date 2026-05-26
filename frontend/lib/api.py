@@ -114,3 +114,7 @@ def create_appointment(token: str, payload: dict) -> dict:
 
 def cancel_appointment(token: str, appointment_id: int) -> dict:
     return _request("PATCH", f"/api/appointments/{appointment_id}/cancel", token=token)
+
+
+def complete_appointment(token: str, appointment_id: int) -> dict:
+    return _request("PATCH", f"/api/appointments/{appointment_id}/complete", token=token)
