@@ -42,6 +42,7 @@ def sidebar_nav() -> None:
         st.page_link("pages/4_Agendar.py", label="Agendar")
         st.page_link("pages/3_Meus_Agendamentos.py", label="Meus agendamentos")
         st.page_link("pages/5_Admin_Dashboard.py", label="Dashboard admin")
+        st.page_link("pages/6_Servicos.py", label="Servicos")
         st.page_link("pages/1_Profissionais.py", label="Profissionais")
         st.page_link("pages/2_Disponibilidade.py", label="Disponibilidade")
 
