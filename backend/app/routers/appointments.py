@@ -35,8 +35,14 @@ def create_appointment(
         return appointment_service.create_appointment(db, current_user=current_user, data=data)
     except appointment_service.ServiceNotFoundError:
         raise HTTPException(status_code=404, detail="Serviço não encontrado") from None
+    except appointment_service.ServiceUnavailableError:
+        raise HTTPException(status_code=400, detail="Servico inativo para agendamento") from None
+    except appointment_service.ProfessionalUnavailableError:
+        raise HTTPException(status_code=400, detail="Profissional indisponivel para agendamento") from None
     except appointment_service.SlotUnavailableError:
         raise HTTPException(status_code=400, detail="Horário indisponível para o profissional") from None
+    except appointment_service.AppointmentConflictError:
+        raise HTTPException(status_code=409, detail="Horario ja reservado para o profissional") from None
     except appointment_service.InvalidAppointmentStateError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from None
     except appointment_service.AppointmentForbiddenError:

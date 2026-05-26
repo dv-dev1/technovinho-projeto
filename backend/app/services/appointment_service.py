@@ -36,6 +36,18 @@ class ServiceNotFoundError(Exception):
     pass
 
 
+class ServiceUnavailableError(Exception):
+    pass
+
+
+class ProfessionalUnavailableError(Exception):
+    pass
+
+
+class AppointmentConflictError(Exception):
+    pass
+
+
 def _to_out(row: Appointment) -> dict:
     prof_user = row.professional.user if row.professional else None
     return {
@@ -81,6 +93,37 @@ def list_appointments(
     return [_to_out(r) for r in rows]
 
 
+def _as_utc(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
+
+def _has_booking_conflict(
+    db: Session,
+    *,
+    professional_id: int,
+    scheduled_at: datetime,
+    duration_minutes: int,
+) -> bool:
+    requested_start = _as_utc(scheduled_at)
+    requested_end = requested_start + timedelta(minutes=duration_minutes)
+    rows = db.scalars(
+        select(Appointment)
+        .options(joinedload(Appointment.service))
+        .where(
+            Appointment.professional_id == professional_id,
+            Appointment.status != AppointmentStatus.cancelled,
+        )
+    ).all()
+    for row in rows:
+        existing_start = _as_utc(row.scheduled_at)
+        existing_end = existing_start + timedelta(minutes=row.service.duration)
+        if requested_start < existing_end and existing_start < requested_end:
+            return True
+    return False
+
+
 def create_appointment(db: Session, *, current_user: User, data: AppointmentCreate) -> dict:
     if current_user.role != UserRole.client:
         raise AppointmentForbiddenError()
@@ -88,16 +131,32 @@ def create_appointment(db: Session, *, current_user: User, data: AppointmentCrea
     service = db.get(Service, data.service_id)
     if service is None:
         raise ServiceNotFoundError()
+    if not service.active:
+        raise ServiceUnavailableError()
 
-    scheduled = data.scheduled_at
-    if scheduled.tzinfo is None:
-        scheduled = scheduled.replace(tzinfo=timezone.utc)
+    professional = db.get(Professional, data.professional_id)
+    if professional is None or not professional.active:
+        raise ProfessionalUnavailableError()
+
+    scheduled = _as_utc(data.scheduled_at)
     now = datetime.now(timezone.utc)
     if scheduled <= now:
         raise InvalidAppointmentStateError("Agendamento deve ser no futuro")
 
-    if not availability_service.is_slot_available(db, data.professional_id, scheduled):
+    if not availability_service.is_slot_available(
+        db,
+        data.professional_id,
+        scheduled,
+        duration_minutes=service.duration,
+    ):
         raise SlotUnavailableError()
+    if _has_booking_conflict(
+        db,
+        professional_id=data.professional_id,
+        scheduled_at=scheduled,
+        duration_minutes=service.duration,
+    ):
+        raise AppointmentConflictError()
 
     appointment = Appointment(
         client_id=current_user.id,

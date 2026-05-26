@@ -17,7 +17,12 @@ def availability_for_date(rows: list[dict], selected_date: date) -> list[dict]:
     return [row for row in rows if row.get("day_of_week") == day]
 
 
-def build_slot_options(rows: list[dict], *, step_minutes: int = 30) -> list[dict]:
+def build_slot_options(
+    rows: list[dict],
+    *,
+    duration_minutes: int = 0,
+    step_minutes: int = 30,
+) -> list[dict]:
     slots = []
     seen = set()
 
@@ -25,7 +30,8 @@ def build_slot_options(rows: list[dict], *, step_minutes: int = 30) -> list[dict
         current = datetime.combine(date.today(), _parse_time(row["start_time"]))
         end = datetime.combine(date.today(), _parse_time(row["end_time"]))
 
-        while current < end:
+        duration = timedelta(minutes=duration_minutes or step_minutes)
+        while current + duration <= end:
             slot_time = current.time().replace(second=0, microsecond=0)
             if slot_time not in seen:
                 slots.append({"label": slot_time.strftime("%H:%M"), "time": slot_time})

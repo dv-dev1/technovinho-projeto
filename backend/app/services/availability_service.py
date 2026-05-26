@@ -1,4 +1,4 @@
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
@@ -81,12 +81,19 @@ def delete_slot(db: Session, availability_id: int) -> None:
     db.commit()
 
 
-def is_slot_available(db: Session, professional_id: int, scheduled_at: datetime) -> bool:
+def is_slot_available(
+    db: Session,
+    professional_id: int,
+    scheduled_at: datetime,
+    *,
+    duration_minutes: int = 0,
+) -> bool:
     if scheduled_at.tzinfo is not None:
         scheduled_at = scheduled_at.replace(tzinfo=None)
 
     day = scheduled_at.weekday()  # 0=Segunda (Python)
     slot_time = scheduled_at.time()
+    end_time = (scheduled_at + timedelta(minutes=duration_minutes)).time()
 
     rows = db.scalars(
         select(Availability).where(
@@ -94,7 +101,7 @@ def is_slot_available(db: Session, professional_id: int, scheduled_at: datetime)
                 Availability.professional_id == professional_id,
                 Availability.day_of_week == day,
                 Availability.start_time <= slot_time,
-                Availability.end_time > slot_time,
+                Availability.end_time >= end_time,
             )
         )
     ).all()

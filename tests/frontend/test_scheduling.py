@@ -46,6 +46,13 @@ class SchedulingTests(unittest.TestCase):
             scheduling.combine_date_time(date(2026, 6, 1), time(14, 30)),
         )
 
+    def test_slot_options_fit_selected_service_duration(self):
+        rows = [{"day_of_week": 0, "start_time": "09:00:00", "end_time": "10:00:00"}]
+
+        slots = scheduling.build_slot_options(rows, duration_minutes=45)
+
+        self.assertEqual([{"label": "09:00", "time": time(9, 0)}], slots)
+
 
 if __name__ == "__main__":
     unittest.main()
