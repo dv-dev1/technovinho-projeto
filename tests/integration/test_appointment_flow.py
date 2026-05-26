@@ -55,6 +55,12 @@ class AppointmentFlowIntegrationTests(unittest.TestCase):
                 password=hash_password("senha12345"),
                 role=UserRole.client,
             )
+            admin_user = User(
+                name="Admin Teste",
+                email="admin@test.com",
+                password=hash_password("senha12345"),
+                role=UserRole.admin,
+            )
             barber_user = User(
                 name="Barbeiro Teste",
                 email="barbeiro@test.com",
@@ -68,7 +74,7 @@ class AppointmentFlowIntegrationTests(unittest.TestCase):
                 price=35,
                 active=True,
             )
-            db.add_all([client_user, barber_user, service])
+            db.add_all([client_user, admin_user, barber_user, service])
             db.commit()
             db.refresh(barber_user)
             db.refresh(service)
@@ -98,6 +104,14 @@ class AppointmentFlowIntegrationTests(unittest.TestCase):
         )
         self.assertEqual(200, login_response.status_code)
         return login_response.json()["access_token"]
+
+    def _admin_token(self):
+        response = self.client.post(
+            "/api/auth/login",
+            json={"email": "admin@test.com", "password": "senha12345"},
+        )
+        self.assertEqual(200, response.status_code)
+        return response.json()["access_token"]
 
     def _appointment_payload(self, scheduled_time=time(14, 0)):
         return {
@@ -148,6 +162,53 @@ class AppointmentFlowIntegrationTests(unittest.TestCase):
 
         self.assertEqual(201, first.status_code)
         self.assertEqual(409, second.status_code)
+
+    def test_client_can_cancel_own_appointment_before_deadline(self):
+        headers = {"Authorization": f"Bearer {self._login_token()}"}
+        created = self.client.post("/api/appointments", headers=headers, json=self._appointment_payload())
+
+        response = self.client.patch(
+            f"/api/appointments/{created.json()['id']}/cancel",
+            headers=headers,
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("cancelled", response.json()["status"])
+
+    def test_cancellation_is_rejected_after_deadline(self):
+        with SessionLocal() as db:
+            client = db.scalar(select(User).where(User.email == "cliente@test.com"))
+            row = Appointment(
+                client_id=client.id,
+                professional_id=self.professional_id,
+                service_id=self.service_id,
+                scheduled_at=datetime.now(timezone.utc) + timedelta(hours=1),
+                status="pending",
+            )
+            db.add(row)
+            db.commit()
+            db.refresh(row)
+            appointment_id = row.id
+
+        response = self.client.patch(
+            f"/api/appointments/{appointment_id}/cancel",
+            headers={"Authorization": f"Bearer {self._login_token()}"},
+        )
+
+        self.assertEqual(400, response.status_code)
+        self.assertIn("24h", response.json()["detail"])
+
+    def test_admin_can_cancel_client_appointment(self):
+        headers = {"Authorization": f"Bearer {self._login_token()}"}
+        created = self.client.post("/api/appointments", headers=headers, json=self._appointment_payload())
+
+        response = self.client.patch(
+            f"/api/appointments/{created.json()['id']}/cancel",
+            headers={"Authorization": f"Bearer {self._admin_token()}"},
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("cancelled", response.json()["status"])
 
 
 if __name__ == "__main__":

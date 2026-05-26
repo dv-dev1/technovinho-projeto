@@ -19,6 +19,12 @@ Referência: `api-agendamento-backend` (Express + MongoDB).
 | `POST availability` | `POST /api/professionals/{id}/availability` | admin | ✅ |
 | `DELETE availability` | `DELETE /api/availability/{id}` | admin | ✅ |
 
+## Cancelamento RF06
+
+`PATCH /api/appointments/{id}/cancel` permite cancelamento pelo cliente dono
+do agendamento ou por um administrador. A antecedencia minima e configurada
+por `CANCEL_MIN_HOURS` (padrao: `24`); fora do prazo a API responde HTTP 400.
+
 ## Diferenças intencionais (APS)
 
 | Item | Legado | TECHNOVINHO |
