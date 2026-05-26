@@ -110,5 +110,5 @@ def test_successful_booking_shows_confirmation_text(monkeypatch):
     app = authenticated_booking_app().run()
     app.button[0].click().run()
 
-    assert app.session_state["appointment_confirmation"]["id"] == 99
+    assert app.session_state["last_booking"]["id"] == 99
     assert "Agendamento solicitado." in app.success[0].value

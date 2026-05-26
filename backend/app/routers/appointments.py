@@ -3,10 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_current_user
+from app.core.deps import get_current_user, require_roles
 from app.db.session import get_db
 from app.models.appointment import AppointmentStatus
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.appointment import AppointmentCreate, AppointmentOut
 from app.services import appointment_service
 
@@ -35,8 +35,14 @@ def create_appointment(
         return appointment_service.create_appointment(db, current_user=current_user, data=data)
     except appointment_service.ServiceNotFoundError:
         raise HTTPException(status_code=404, detail="Serviço não encontrado") from None
+    except appointment_service.ServiceUnavailableError:
+        raise HTTPException(status_code=400, detail="Servico inativo para agendamento") from None
+    except appointment_service.ProfessionalUnavailableError:
+        raise HTTPException(status_code=400, detail="Profissional indisponivel para agendamento") from None
     except appointment_service.SlotUnavailableError:
         raise HTTPException(status_code=400, detail="Horário indisponível para o profissional") from None
+    except appointment_service.AppointmentConflictError:
+        raise HTTPException(status_code=409, detail="Horario ja reservado para o profissional") from None
     except appointment_service.InvalidAppointmentStateError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from None
     except appointment_service.AppointmentForbiddenError:
@@ -59,5 +65,19 @@ def cancel_appointment(
         raise HTTPException(status_code=403, detail="Sem permissão para cancelar") from None
     except appointment_service.CancelDeadlineError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from None
+    except appointment_service.InvalidAppointmentStateError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+
+
+@router.patch("/{appointment_id}/complete", response_model=AppointmentOut)
+def complete_appointment(
+    appointment_id: int,
+    _: Annotated[User, Depends(require_roles(UserRole.admin))],
+    db: Annotated[Session, Depends(get_db)],
+):
+    try:
+        return appointment_service.complete_appointment(db, appointment_id=appointment_id)
+    except appointment_service.AppointmentNotFoundError:
+        raise HTTPException(status_code=404, detail="Agendamento nao encontrado") from None
     except appointment_service.InvalidAppointmentStateError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from None

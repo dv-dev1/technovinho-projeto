@@ -36,6 +36,18 @@ class ServiceNotFoundError(Exception):
     pass
 
 
+class ServiceUnavailableError(Exception):
+    pass
+
+
+class ProfessionalUnavailableError(Exception):
+    pass
+
+
+class AppointmentConflictError(Exception):
+    pass
+
+
 def _to_out(row: Appointment) -> dict:
     prof_user = row.professional.user if row.professional else None
     return {
@@ -46,6 +58,7 @@ def _to_out(row: Appointment) -> dict:
         "professional_name": prof_user.name if prof_user else None,
         "service_id": row.service_id,
         "service_name": row.service.name if row.service else None,
+        "service_price": row.service.price if row.service else None,
         "scheduled_at": row.scheduled_at,
         "status": row.status,
         "notes": row.notes,
@@ -81,6 +94,37 @@ def list_appointments(
     return [_to_out(r) for r in rows]
 
 
+def _as_utc(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
+
+def _has_booking_conflict(
+    db: Session,
+    *,
+    professional_id: int,
+    scheduled_at: datetime,
+    duration_minutes: int,
+) -> bool:
+    requested_start = _as_utc(scheduled_at)
+    requested_end = requested_start + timedelta(minutes=duration_minutes)
+    rows = db.scalars(
+        select(Appointment)
+        .options(joinedload(Appointment.service))
+        .where(
+            Appointment.professional_id == professional_id,
+            Appointment.status != AppointmentStatus.cancelled,
+        )
+    ).all()
+    for row in rows:
+        existing_start = _as_utc(row.scheduled_at)
+        existing_end = existing_start + timedelta(minutes=row.service.duration)
+        if requested_start < existing_end and existing_start < requested_end:
+            return True
+    return False
+
+
 def create_appointment(db: Session, *, current_user: User, data: AppointmentCreate) -> dict:
     if current_user.role != UserRole.client:
         raise AppointmentForbiddenError()
@@ -88,16 +132,32 @@ def create_appointment(db: Session, *, current_user: User, data: AppointmentCrea
     service = db.get(Service, data.service_id)
     if service is None:
         raise ServiceNotFoundError()
+    if not service.active:
+        raise ServiceUnavailableError()
 
-    scheduled = data.scheduled_at
-    if scheduled.tzinfo is None:
-        scheduled = scheduled.replace(tzinfo=timezone.utc)
+    professional = db.get(Professional, data.professional_id)
+    if professional is None or not professional.active:
+        raise ProfessionalUnavailableError()
+
+    scheduled = _as_utc(data.scheduled_at)
     now = datetime.now(timezone.utc)
     if scheduled <= now:
         raise InvalidAppointmentStateError("Agendamento deve ser no futuro")
 
-    if not availability_service.is_slot_available(db, data.professional_id, scheduled):
+    if not availability_service.is_slot_available(
+        db,
+        data.professional_id,
+        scheduled,
+        duration_minutes=service.duration,
+    ):
         raise SlotUnavailableError()
+    if _has_booking_conflict(
+        db,
+        professional_id=data.professional_id,
+        scheduled_at=scheduled,
+        duration_minutes=service.duration,
+    ):
+        raise AppointmentConflictError()
 
     appointment = Appointment(
         client_id=current_user.id,
@@ -140,5 +200,22 @@ def cancel_appointment(db: Session, *, appointment_id: int, current_user: User) 
     row.status = AppointmentStatus.cancelled
     db.commit()
     db.refresh(row)
+    row = db.scalar(_base_query().where(Appointment.id == appointment_id))
+    return _to_out(row)
+
+
+def complete_appointment(db: Session, *, appointment_id: int) -> dict:
+    row = db.scalar(_base_query().where(Appointment.id == appointment_id))
+    if row is None:
+        raise AppointmentNotFoundError()
+    if row.status == AppointmentStatus.cancelled:
+        raise InvalidAppointmentStateError("Agendamento cancelado nao pode ser concluido")
+    if row.status == AppointmentStatus.done:
+        raise InvalidAppointmentStateError("Agendamento ja concluido")
+    if _as_utc(row.scheduled_at) > datetime.now(timezone.utc):
+        raise InvalidAppointmentStateError("Atendimento futuro nao pode ser concluido")
+
+    row.status = AppointmentStatus.done
+    db.commit()
     row = db.scalar(_base_query().where(Appointment.id == appointment_id))
     return _to_out(row)

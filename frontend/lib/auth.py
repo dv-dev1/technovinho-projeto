@@ -11,6 +11,7 @@ AUTH_SESSION_KEYS = (
     "user_name",
     "user",
     "appointment_confirmation",
+    "last_booking",
 )
 
 
