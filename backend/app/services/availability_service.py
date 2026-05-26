@@ -92,16 +92,21 @@ def is_slot_available(
         scheduled_at = scheduled_at.replace(tzinfo=None)
 
     day = scheduled_at.weekday()  # 0=Segunda (Python)
-    slot_time = scheduled_at.time()
-    end_time = (scheduled_at + timedelta(minutes=duration_minutes)).time()
+    slot_start = scheduled_at.time()
+    slot_end_dt = scheduled_at + timedelta(minutes=duration_minutes)
+
+    if slot_end_dt.date() != scheduled_at.date():
+        return False
+
+    slot_end = slot_end_dt.time()
 
     rows = db.scalars(
         select(Availability).where(
             and_(
                 Availability.professional_id == professional_id,
                 Availability.day_of_week == day,
-                Availability.start_time <= slot_time,
-                Availability.end_time >= end_time,
+                Availability.start_time <= slot_start,
+                Availability.end_time >= slot_end,
             )
         )
     ).all()

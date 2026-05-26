@@ -1,0 +1,64 @@
+TECHNOVINHO - Registro de erros em testes locais
+
+Data de inicio: 2026-05-26
+Responsavel: Codex + Lucio
+
+Formato de registro:
+- Data/hora:
+- Area:
+- Passos para reproduzir:
+- Resultado esperado:
+- Resultado obtido:
+- Severidade:
+- Status:
+- Observacoes:
+
+Registros:
+
+1.
+- Data/hora: 2026-05-26
+- Area: Ambiente local / bootstrap
+- Passos para reproduzir:
+  Tentar iniciar a aplicacao localmente a partir do workspace.
+- Resultado esperado:
+  Docker e/ou Python operacional para subir backend, frontend e banco.
+- Resultado obtido:
+  `docker` nao encontrado no ambiente e `python` do PATH aponta para o alias da Windows Store, falhando ao executar scripts.
+- Severidade:
+  Alta
+- Status:
+  Resolvido no ambiente local
+- Observacoes:
+  Docker Desktop foi instalado e a stack passou a subir com `docker compose`.
+
+2.
+- Data/hora: 2026-05-26
+- Area: Backend / migration inicial
+- Passos para reproduzir:
+  Subir a stack com `docker compose up --build -d` em banco PostgreSQL vazio.
+- Resultado esperado:
+  A migration `001_initial_schema` deve criar schema inicial e iniciar a API.
+- Resultado obtido:
+  A API encerra durante o bootstrap com erro `type "user_role" already exists`.
+- Severidade:
+  Alta
+- Status:
+  Corrigido localmente e validado
+- Observacoes:
+  A migration criava os enums manualmente e o SQLAlchemy tentava cria-los de novo ao criar as tabelas.
+
+3.
+- Data/hora: 2026-05-26
+- Area: Backend / regra de agendamento
+- Passos para reproduzir:
+  Com um servico de 45 minutos e disponibilidade do profissional de 09:00 a 18:00 na segunda-feira, criar agendamento para `2026-06-01T17:50:00Z`.
+- Resultado esperado:
+  A API deveria rejeitar o agendamento, pois o atendimento terminaria apos o fim da faixa disponivel.
+- Resultado obtido:
+  A API aceitou o agendamento e retornou `201 Created`.
+- Severidade:
+  Alta
+- Status:
+  Corrigido localmente e validado
+- Observacoes:
+  A validacao passou a considerar a duracao do servico contra o horario final da disponibilidade e tambem conflito com agendamentos ativos do mesmo profissional.
