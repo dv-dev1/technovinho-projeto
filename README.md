@@ -11,6 +11,12 @@ Sistema de gestão de barbearias (APS E3 · GTIADS 2026.1).
 - **Trello:** https://trello.com/b/VPTx8KsB/technovinho
 - **Legado (referência):** [api-agendamento-backend](https://github.com/dv-dev1/api-agendamento-backend)
 
+## Prototipo
+
+- **Link Figma view-only:** https://www.figma.com/design/O79fatjH5z0BStcQDUdwIv/Sem-t%C3%ADtulo?node-id=0-1&t=pxWPDhk6RPPRs3Ym-1
+- **Wireframes principais (Figma-ready):** [docs/PROTOTIPO_FIGMA_WIREFRAMES.md](docs/PROTOTIPO_FIGMA_WIREFRAMES.md)
+- **Arquivo visual importavel no Figma:** [docs/prototipo-figma-wireframes.svg](docs/prototipo-figma-wireframes.svg)
+
 ## Subir com Docker
 
 ```bash
@@ -33,6 +39,15 @@ export DATABASE_URL=postgresql+psycopg2://technovinho:technovinho@localhost:5432
 export JWT_SECRET=dev-secret
 alembic upgrade head
 uvicorn app.main:app --reload
+```
+
+## Testes automaticos de interface
+
+Os testes de interface Streamlit usam `pytest` com `streamlit.testing.v1.AppTest`.
+
+```bash
+pip install -r frontend/requirements.txt -r requirements-dev.txt
+pytest tests/ui
 ```
 
 ## Auth (curl)

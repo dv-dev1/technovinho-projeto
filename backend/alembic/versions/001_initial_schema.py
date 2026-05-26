@@ -19,7 +19,12 @@ depends_on: Union[str, Sequence[str], None] = None
 
 user_role = postgresql.ENUM("admin", "barber", "client", name="user_role", create_type=False)
 appointment_status = postgresql.ENUM(
-    "pending", "confirmed", "cancelled", "done", name="appointment_status", create_type=False
+    "pending",
+    "confirmed",
+    "cancelled",
+    "done",
+    name="appointment_status",
+    create_type=False,
 )
 
 

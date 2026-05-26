@@ -1,14 +1,25 @@
-# Testes JMeter — TECHNOVINHO
+# Testes JMeter - TECHNOVINHO
 
-Pré-requisitos: API no ar (`docker compose up`), usuário admin com token.
+Pre-requisitos: API no ar (`docker compose up`), usuario cliente com token e massa base no banco.
 
 ## Gerar token
 
 ```bash
 curl -s -X POST http://localhost:8000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@test.com","password":"senha12345"}' | jq -r .access_token
+  -d '{"email":"cliente@test.com","password":"senha12345"}' | jq -r .access_token
 ```
+
+## Preparar massa do POST
+
+O cenario `POST /api/appointments` usa `tests/jmeter/appointments.csv` para variar `scheduled_at` e evitar que todas as threads tentem reservar o mesmo horario.
+
+Antes da execucao real, garanta no banco:
+
+- usuario cliente autenticado pelo `JWT_TOKEN`;
+- `service_id=1` ativo;
+- `professional_id=1` ativo;
+- disponibilidade ampla para as datas existentes em `appointments.csv`.
 
 ## Executar
 
@@ -17,17 +28,32 @@ export JWT_TOKEN="cole_o_token_aqui"
 jmeter -n -t tests/jmeter/technovinho.jmx -l tests/jmeter/results.jtl -e -o tests/jmeter/report
 ```
 
-## Cenários (APS)
+No PowerShell:
 
-| # | Threads | Ramp-up | Request |
-|---|---------|---------|---------|
-| 1 | 50 | 10s | GET `/api/appointments` |
-| 2 | 20 | 5s | POST `/api/appointments` |
+```powershell
+$env:JWT_TOKEN="cole_o_token_aqui"
+jmeter -n -t tests/jmeter/technovinho.jmx -l tests/jmeter/results.jtl -e -o tests/jmeter/report
+```
 
-Meta documentada: tempo médio GET < 500ms (registrar valor real no relatório HTML em `tests/jmeter/report`).
+## Cenarios APS
 
-## Variáveis no `.jmx`
+| # | Threads | Ramp-up | Loop | Request |
+|---|---:|---:|---:|---|
+| 1 | 50 | 10s | 5 | GET `/api/appointments` |
+| 2 | 20 | 5s | 3 | POST `/api/appointments` |
+
+Meta documentada: tempo medio GET < 500ms. Registrar valor real no relatorio HTML em `tests/jmeter/report`.
+
+## Variaveis no `.jmx`
 
 - `API_HOST` (default `localhost`)
 - `API_PORT` (default `8000`)
-- `JWT_TOKEN` (obrigatório)
+- `JWT_TOKEN` (obrigatorio)
+
+## Validacao estrutural sem JMeter
+
+Se o binario `jmeter` nao estiver instalado na maquina, valide ao menos a estrutura do plano:
+
+```bash
+venv\Scripts\python.exe -m pytest tests\integration\test_jmeter_rnf03_plan.py
+```

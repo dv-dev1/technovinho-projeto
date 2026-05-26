@@ -1,0 +1,45 @@
+from datetime import date, datetime, time, timedelta
+
+
+def is_past_date(selected_date: date, *, today: date | None = None) -> bool:
+    reference = today or date.today()
+    return selected_date < reference
+
+
+def _parse_time(value: str | time) -> time:
+    if isinstance(value, time):
+        return value
+    return time.fromisoformat(value)
+
+
+def availability_for_date(rows: list[dict], selected_date: date) -> list[dict]:
+    day = selected_date.weekday()
+    return [row for row in rows if row.get("day_of_week") == day]
+
+
+def build_slot_options(
+    rows: list[dict],
+    *,
+    duration_minutes: int = 0,
+    step_minutes: int = 30,
+) -> list[dict]:
+    slots = []
+    seen = set()
+
+    for row in rows:
+        current = datetime.combine(date.today(), _parse_time(row["start_time"]))
+        end = datetime.combine(date.today(), _parse_time(row["end_time"]))
+
+        duration = timedelta(minutes=duration_minutes or step_minutes)
+        while current + duration <= end:
+            slot_time = current.time().replace(second=0, microsecond=0)
+            if slot_time not in seen:
+                slots.append({"label": slot_time.strftime("%H:%M"), "time": slot_time})
+                seen.add(slot_time)
+            current += timedelta(minutes=step_minutes)
+
+    return sorted(slots, key=lambda item: item["time"])
+
+
+def combine_date_time(selected_date: date, selected_time: time) -> str:
+    return datetime.combine(selected_date, selected_time).replace(microsecond=0).isoformat()

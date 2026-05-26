@@ -1,24 +1,21 @@
 import streamlit as st
 
-from lib import api
+from lib import api, auth, ui
 
-st.set_page_config(page_title="TECHNOVINHO", page_icon="✂️", layout="wide")
+st.set_page_config(page_title="TECHNOVINHO", page_icon=":scissors:", layout="wide")
 
-if "token" not in st.session_state:
-    st.session_state.token = None
-if "user" not in st.session_state:
-    st.session_state.user = None
+auth.ensure_session_defaults()
+ui.sidebar_nav()
 
 st.title("TECHNOVINHO")
-st.caption("Gestão de barbearias — APS")
+st.caption("Gestao de barbearias - APS")
 
 with st.sidebar:
     if st.session_state.token:
-        st.write(f"**{st.session_state.user['name']}**")
-        st.caption(f"Perfil: {st.session_state.user['role']}")
+        st.write(f"**{st.session_state.user_name or 'Usuario'}**")
+        st.caption(f"Perfil: {st.session_state.user_role or 'sem perfil'}")
         if st.button("Sair"):
-            st.session_state.token = None
-            st.session_state.user = None
+            auth.logout()
             st.rerun()
     else:
         st.subheader("Login")
@@ -27,19 +24,21 @@ with st.sidebar:
             password = st.text_input("Senha", type="password")
             if st.form_submit_button("Entrar"):
                 try:
-                    data = api.login(email, password)
-                    st.session_state.token = data["access_token"]
-                    st.session_state.user = api.me(st.session_state.token)
+                    with st.spinner("Entrando..."):
+                        data = api.login(email, password)
+                        user = api.me(data["access_token"])
+                    auth.set_authenticated_session(data["access_token"], user)
                     st.rerun()
                 except api.ApiError as err:
-                    st.error(err.detail)
+                    ui.show_api_error(err)
+        st.page_link("pages/0_Registro.py", label="Criar conta")
 
 if st.session_state.token:
-    if st.session_state.user.get("role") == "admin":
-        st.success("Admin: **Profissionais**, **Disponibilidade**.")
-    elif st.session_state.user.get("role") == "client":
-        st.success("Cliente: abra **Meus agendamentos**.")
+    if st.session_state.user_role == "admin":
+        st.success("Admin: use Dashboard admin, Profissionais e Disponibilidade.")
+    elif st.session_state.user_role == "client":
+        st.success("Cliente: use Agendar e Meus agendamentos.")
     else:
         st.info("Use o menu conforme seu perfil.")
 else:
-    st.info("Entre com usuário admin para gerenciar profissionais e disponibilidade.")
+    st.info("Entre ou crie uma conta para acessar as funcionalidades do TECHNOVINHO.")

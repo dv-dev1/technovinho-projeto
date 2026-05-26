@@ -86,10 +86,8 @@ def is_slot_available(
     professional_id: int,
     scheduled_at: datetime,
     *,
-    duration_minutes: int,
+    duration_minutes: int = 0,
 ) -> bool:
-    from app.models.appointment import Appointment, AppointmentStatus
-
     if scheduled_at.tzinfo is not None:
         scheduled_at = scheduled_at.replace(tzinfo=None)
 
@@ -112,28 +110,4 @@ def is_slot_available(
             )
         )
     ).all()
-    if not rows:
-        return False
-
-    active_statuses = (AppointmentStatus.pending, AppointmentStatus.confirmed)
-    appointments = db.scalars(
-        select(Appointment).where(
-            and_(
-                Appointment.professional_id == professional_id,
-                Appointment.status.in_(active_statuses),
-            )
-        )
-    ).all()
-
-    for appointment in appointments:
-        existing_start = appointment.scheduled_at
-        if existing_start.tzinfo is not None:
-            existing_start = existing_start.replace(tzinfo=None)
-
-        service_duration = appointment.service.duration
-        existing_end = existing_start + timedelta(minutes=service_duration)
-
-        if scheduled_at < existing_end and existing_start < slot_end_dt:
-            return False
-
-    return True
+    return len(rows) > 0
