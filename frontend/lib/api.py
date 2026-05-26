@@ -87,6 +87,10 @@ def create_professional(token: str, payload: dict) -> dict:
     return _request("POST", "/api/professionals", token=token, json=payload)
 
 
+def update_professional(token: str, professional_id: int, payload: dict) -> dict:
+    return _request("PATCH", f"/api/professionals/{professional_id}", token=token, json=payload)
+
+
 def list_availability(token: str, professional_id: int) -> list:
     return _request("GET", f"/api/professionals/{professional_id}/availability", token=token) or []
 
