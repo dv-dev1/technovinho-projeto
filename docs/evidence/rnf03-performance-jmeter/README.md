@@ -21,7 +21,7 @@ venv\Scripts\python.exe -m pytest tests\integration\test_jmeter_rnf03_plan.py
 Resultado:
 
 ```text
-3 passed in 0.05s
+3 passed in 0.03s
 ```
 
 ## Regressao
@@ -35,21 +35,43 @@ venv\Scripts\python.exe -m pytest tests\integration
 Resultado:
 
 ```text
-28 passed in 27.16s
+28 passed in 27.30s
 ```
 
-## Pendente para medicao real
+## Medicao real com JMeter
 
-O binario `jmeter` nao esta instalado nesta maquina:
+Foi instalada uma copia local do Apache JMeter 5.6.3 em:
 
 ```text
-jmeter: comando nao reconhecido
+C:\Users\pedro\Documents\Codex\tools\apache-jmeter-5.6.3
 ```
 
-Por isso, ainda falta executar a medicao real de carga e anexar o relatorio HTML ou Aggregate Report com tempos medios e percentual de erro.
-
-Quando o JMeter estiver disponivel, executar:
+Comando executado:
 
 ```bash
-jmeter -n -t tests/jmeter/technovinho.jmx -JJWT_TOKEN=TOKEN_VALIDO -l tests/jmeter/results.jtl -e -o tests/jmeter/report
+jmeter -n -t tests/jmeter/technovinho.jmx -JJWT_TOKEN=TOKEN_VALIDO -l results-rnf03.jtl -e -o report
+```
+
+Resumo do JMeter:
+
+```text
+summary = 310 in 00:00:10 = 31.5/s Avg: 1 Min: 0 Max: 98 Err: 0 (0.00%)
+```
+
+Aggregate summary:
+
+| Endpoint | Samples | Avg | Min | Max | Errors | Error % |
+|---|---:|---:|---:|---:|---:|---:|
+| `GET /api/appointments` | 250 | 1.77ms | 0ms | 98ms | 0 | 0.00% |
+| `POST /api/appointments` | 60 | 2.83ms | 0ms | 80ms | 0 | 0.00% |
+
+Conclusao: meta RNF03 de media abaixo de 500ms atingida no ambiente local Docker.
+
+## Arquivos gerados localmente
+
+Os arquivos brutos foram gerados fora do repositório para evitar versionar o relatorio HTML completo:
+
+```text
+C:\Users\pedro\Documents\Codex\2026-05-26\tenho-um-projeto-integrado-no-github\jmeter-rnf03-run\results-rnf03.jtl
+C:\Users\pedro\Documents\Codex\2026-05-26\tenho-um-projeto-integrado-no-github\jmeter-rnf03-run\report
 ```

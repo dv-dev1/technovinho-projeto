@@ -17,7 +17,7 @@
           </elementProp>
           <elementProp name="JWT_TOKEN" elementType="Argument">
             <stringProp name="Argument.name">JWT_TOKEN</stringProp>
-            <stringProp name="Argument.value">SUBSTITUA_SEU_TOKEN</stringProp>
+            <stringProp name="Argument.value">${__P(JWT_TOKEN,SUBSTITUA_SEU_TOKEN)}</stringProp>
           </elementProp>
         </collectionProp>
       </elementProp>

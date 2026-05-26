@@ -27,12 +27,12 @@ Esta matriz registra o rastreio do requisito nao funcional de desempenho da API.
 - [x] Cenario POST `/api/appointments` com 20 threads.
 - [x] Massa do POST varia `scheduled_at`.
 - [x] Teste automatizado valida estrutura do `.jmx`.
-- [ ] Executar JMeter real e anexar relatorio HTML/aggregate report.
-- [ ] Registrar tempo medio real e comparar com meta de 500ms.
+- [x] Executar JMeter real e anexar relatorio/aggregate summary.
+- [x] Registrar tempo medio real e comparar com meta de 500ms.
 
 ## Validacao local realizada
 
-O binario `jmeter` nao estava instalado nesta maquina, entao a execucao real de carga ficou pendente. Foi feita validacao estrutural automatizada dos artefatos versionados.
+Foi feita validacao estrutural automatizada dos artefatos versionados e execucao real com Apache JMeter 5.6.3 instalado localmente em `C:\Users\pedro\Documents\Codex\tools`.
 
 Comando:
 
@@ -43,7 +43,7 @@ venv\Scripts\python.exe -m pytest tests\integration\test_jmeter_rnf03_plan.py
 Resultado:
 
 ```text
-3 passed in 0.05s
+3 passed in 0.03s
 ```
 
 Regressao de integracao:
@@ -55,8 +55,31 @@ venv\Scripts\python.exe -m pytest tests\integration
 Resultado:
 
 ```text
-28 passed in 27.16s
+28 passed in 27.30s
 ```
+
+## Resultado JMeter real
+
+Comando executado:
+
+```bash
+jmeter -n -t tests/jmeter/technovinho.jmx -JJWT_TOKEN=TOKEN_VALIDO -l results-rnf03.jtl -e -o report
+```
+
+Resumo geral:
+
+```text
+310 amostras em 10s, throughput 31.5/s, media geral 1ms, erro 0.00%
+```
+
+Resumo por endpoint:
+
+| Endpoint | Amostras | Media | Min | Max | Erros |
+|---|---:|---:|---:|---:|---:|
+| `GET /api/appointments` | 250 | 1.77ms | 0ms | 98ms | 0 |
+| `POST /api/appointments` | 60 | 2.83ms | 0ms | 80ms | 0 |
+
+Conclusao: a meta documentada de tempo medio abaixo de **500ms** foi atingida no ambiente local Docker.
 
 ## Como executar a medicao real
 
