@@ -24,15 +24,13 @@ Antes da execucao real, garanta no banco:
 ## Executar
 
 ```bash
-export JWT_TOKEN="cole_o_token_aqui"
-jmeter -n -t tests/jmeter/technovinho.jmx -l tests/jmeter/results.jtl -e -o tests/jmeter/report
+jmeter -n -t tests/jmeter/technovinho.jmx -JJWT_TOKEN="cole_o_token_aqui" -l tests/jmeter/results.jtl -e -o tests/jmeter/report
 ```
 
 No PowerShell:
 
 ```powershell
-$env:JWT_TOKEN="cole_o_token_aqui"
-jmeter -n -t tests/jmeter/technovinho.jmx -l tests/jmeter/results.jtl -e -o tests/jmeter/report
+jmeter -n -t tests/jmeter/technovinho.jmx -JJWT_TOKEN="cole_o_token_aqui" -l tests/jmeter/results.jtl -e -o tests/jmeter/report
 ```
 
 ## Cenarios APS
