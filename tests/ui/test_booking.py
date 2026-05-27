@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 from streamlit.testing.v1 import AppTest
@@ -78,6 +78,7 @@ def test_successful_booking_shows_confirmation_text(monkeypatch):
     import lib.api as runtime_api
 
     disable_sidebar_nav(monkeypatch)
+    target_date = date.today() + timedelta(days=1)
 
     services = [
         {"id": 1, "name": "Corte masculino", "duration": 30, "price": 35.0, "active": True}
@@ -86,7 +87,7 @@ def test_successful_booking_shows_confirmation_text(monkeypatch):
         {"id": 1, "name": "Barbeiro Seed", "specialty": "Corte", "active": True}
     ]
     availability = [
-        {"day_of_week": date.today().weekday(), "start_time": "09:00", "end_time": "10:00"}
+        {"day_of_week": target_date.weekday(), "start_time": "09:00", "end_time": "10:00"}
     ]
 
     def fake_create_appointment(token, payload):
@@ -111,6 +112,7 @@ def test_successful_booking_shows_confirmation_text(monkeypatch):
     monkeypatch.setattr(runtime_api, "create_appointment", fake_create_appointment)
 
     app = authenticated_booking_app().run()
+    app.date_input[0].set_value(target_date).run()
     confirmation_buttons = [
         button for button in app.button if button.label == "Confirmar agendamento"
     ]
