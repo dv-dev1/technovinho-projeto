@@ -22,18 +22,30 @@ def build_slot_options(
     *,
     duration_minutes: int = 0,
     step_minutes: int = 30,
+    selected_date: date | None = None,
+    now: datetime | None = None,
 ) -> list[dict]:
     slots = []
     seen = set()
+    slot_date = selected_date or date.today()
+    should_filter_past = selected_date is not None
+    reference_now = now or datetime.now()
+    if reference_now.tzinfo is not None:
+        reference_now = reference_now.replace(tzinfo=None)
 
     for row in rows:
-        current = datetime.combine(date.today(), _parse_time(row["start_time"]))
-        end = datetime.combine(date.today(), _parse_time(row["end_time"]))
+        current = datetime.combine(slot_date, _parse_time(row["start_time"]))
+        end = datetime.combine(slot_date, _parse_time(row["end_time"]))
 
         duration = timedelta(minutes=duration_minutes or step_minutes)
         while current + duration <= end:
             slot_time = current.time().replace(second=0, microsecond=0)
-            if slot_time not in seen:
+            is_future_slot = (
+                not should_filter_past
+                or slot_date != reference_now.date()
+                or current > reference_now
+            )
+            if is_future_slot and slot_time not in seen:
                 slots.append({"label": slot_time.strftime("%H:%M"), "time": slot_time})
                 seen.add(slot_time)
             current += timedelta(minutes=step_minutes)

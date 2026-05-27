@@ -1,4 +1,4 @@
-from datetime import date, time
+from datetime import date, datetime, time
 import unittest
 
 from frontend.lib import scheduling
@@ -36,6 +36,44 @@ class SchedulingTests(unittest.TestCase):
                 {"label": "10:00", "time": time(10, 0)},
                 {"label": "14:00", "time": time(14, 0)},
                 {"label": "14:30", "time": time(14, 30)},
+            ],
+            slots,
+        )
+
+    def test_build_slot_options_hides_past_slots_for_today(self):
+        today = date(2026, 5, 27)
+        rows = [
+            {"day_of_week": 2, "start_time": "09:00:00", "end_time": "11:00:00"},
+        ]
+
+        slots = scheduling.build_slot_options(
+            rows,
+            selected_date=today,
+            now=datetime(2026, 5, 27, 10, 0),
+        )
+
+        self.assertEqual(
+            [
+                {"label": "10:30", "time": time(10, 30)},
+            ],
+            slots,
+        )
+
+    def test_build_slot_options_keeps_all_slots_for_future_dates(self):
+        rows = [
+            {"day_of_week": 3, "start_time": "09:00:00", "end_time": "10:00:00"},
+        ]
+
+        slots = scheduling.build_slot_options(
+            rows,
+            selected_date=date(2026, 5, 28),
+            now=datetime(2026, 5, 27, 10, 0),
+        )
+
+        self.assertEqual(
+            [
+                {"label": "09:00", "time": time(9, 0)},
+                {"label": "09:30", "time": time(9, 30)},
             ],
             slots,
         )
