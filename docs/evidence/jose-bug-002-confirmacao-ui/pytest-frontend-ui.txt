@@ -1,0 +1,6 @@
+Card: [Jose] BUG-002 - Corrigir teste UI de confirmacao de agendamento
+Data: 2026-05-26 (America/Fortaleza)
+Comando: .venv/bin/python -m pytest tests/frontend tests/ui -q
+
+.....................................                             [100%]
+37 passed, 7 subtests passed in 0.42s
