@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 
 from streamlit.testing.v1 import AppTest
@@ -84,7 +85,9 @@ def test_successful_booking_shows_confirmation_text(monkeypatch):
     professionals = [
         {"id": 1, "name": "Barbeiro Seed", "specialty": "Corte", "active": True}
     ]
-    availability = [{"day_of_week": 0, "start_time": "09:00", "end_time": "10:00"}]
+    availability = [
+        {"day_of_week": date.today().weekday(), "start_time": "09:00", "end_time": "10:00"}
+    ]
 
     def fake_create_appointment(token, payload):
         assert payload["professional_id"] == 1
@@ -108,7 +111,13 @@ def test_successful_booking_shows_confirmation_text(monkeypatch):
     monkeypatch.setattr(runtime_api, "create_appointment", fake_create_appointment)
 
     app = authenticated_booking_app().run()
-    app.button[0].click().run()
+    confirmation_buttons = [
+        button for button in app.button if button.label == "Confirmar agendamento"
+    ]
+    assert confirmation_buttons, "Formulario deve exibir acao de confirmacao"
+    confirmation_buttons[0].click().run()
 
     assert app.session_state["last_booking"]["id"] == 99
-    assert "Agendamento solicitado." in app.success[0].value
+    assert any(
+        "Agendamento solicitado." in message.value for message in app.success
+    ), "Confirmacao visivel deve ser exibida apos o agendamento"
