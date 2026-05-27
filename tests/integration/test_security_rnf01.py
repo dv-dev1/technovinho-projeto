@@ -1,47 +1,19 @@
-import os
-import sys
-import tempfile
 import unittest
-from pathlib import Path
-
-
-ROOT = Path(__file__).resolve().parents[2]
-BACKEND = ROOT / "backend"
-sys.path.insert(0, str(BACKEND))
-
-DB_FILE = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
-DB_FILE.close()
-os.environ["DATABASE_URL"] = f"sqlite:///{DB_FILE.name}"
-os.environ["JWT_SECRET"] = "test-secret"
 
 from fastapi.testclient import TestClient  # noqa: E402
 from sqlalchemy import select  # noqa: E402
 
-from app.db.base import Base  # noqa: E402
-from app.db.session import SessionLocal, engine  # noqa: E402
+from app.db.session import SessionLocal  # noqa: E402
 from app.main import app  # noqa: E402
 from app.models.user import User  # noqa: E402
+from tests.integration.conftest import clean_integration_db  # noqa: E402
 
 
 class SecurityRNF01Tests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        Base.metadata.create_all(bind=engine)
-
-    @classmethod
-    def tearDownClass(cls):
-        Base.metadata.drop_all(bind=engine)
-        try:
-            os.unlink(DB_FILE.name)
-        except OSError:
-            pass
-
     def setUp(self):
         self.client = TestClient(app)
         with SessionLocal() as db:
-            for user in db.scalars(select(User)).all():
-                db.delete(user)
-            db.commit()
+            clean_integration_db(db)
 
     def test_post_appointments_without_token_returns_standard_401(self):
         response = self.client.post(

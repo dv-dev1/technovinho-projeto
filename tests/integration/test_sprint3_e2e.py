@@ -1,27 +1,9 @@
-import os
-import sys
-import tempfile
 import unittest
 from datetime import datetime, time, timedelta, timezone
-from pathlib import Path
-
-
-ROOT = Path(__file__).resolve().parents[2]
-BACKEND = ROOT / "backend"
-sys.path.insert(0, str(BACKEND))
-sys.path.insert(0, str(ROOT))
-
-DB_FILE = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
-DB_FILE.close()
-os.environ["DATABASE_URL"] = f"sqlite:///{DB_FILE.name}"
-os.environ["JWT_SECRET"] = "test-secret"
 
 from fastapi.testclient import TestClient  # noqa: E402
-from sqlalchemy import delete, select  # noqa: E402
-
 from app.core.security import hash_password  # noqa: E402
-from app.db.base import Base  # noqa: E402
-from app.db.session import SessionLocal, engine  # noqa: E402
+from app.db.session import SessionLocal  # noqa: E402
 from app.main import app  # noqa: E402
 from app.models.appointment import Appointment, AppointmentStatus  # noqa: E402
 from app.models.availability import Availability  # noqa: E402
@@ -29,29 +11,16 @@ from app.models.professional import Professional  # noqa: E402
 from app.models.service import Service  # noqa: E402
 from app.models.user import User, UserRole  # noqa: E402
 from frontend.lib import dashboard  # noqa: E402
+from tests.integration.conftest import clean_integration_db  # noqa: E402
 
 
 class Sprint3E2ETests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        Base.metadata.create_all(bind=engine)
-
-    @classmethod
-    def tearDownClass(cls):
-        Base.metadata.drop_all(bind=engine)
-        try:
-            os.unlink(DB_FILE.name)
-        except OSError:
-            pass
-
     def setUp(self):
         self.client = TestClient(app)
         self.today_slot = datetime.now(timezone.utc) + timedelta(hours=2)
         self.future_slot = datetime.now(timezone.utc) + timedelta(days=3)
         with SessionLocal() as db:
-            for model in (Appointment, Availability, Professional, Service, User):
-                db.execute(delete(model))
-            db.commit()
+            clean_integration_db(db)
 
             client_user = User(
                 name="Cliente E2E",
