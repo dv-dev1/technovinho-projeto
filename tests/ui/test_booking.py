@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 
 from streamlit.testing.v1 import AppTest
@@ -84,7 +85,7 @@ def test_successful_booking_shows_confirmation_text(monkeypatch):
     professionals = [
         {"id": 1, "name": "Barbeiro Seed", "specialty": "Corte", "active": True}
     ]
-    availability = [{"day_of_week": 0, "start_time": "09:00", "end_time": "10:00"}]
+    availability = [{"day_of_week": date.today().weekday(), "start_time": "09:00", "end_time": "10:00"}]
 
     def fake_create_appointment(token, payload):
         assert payload["professional_id"] == 1

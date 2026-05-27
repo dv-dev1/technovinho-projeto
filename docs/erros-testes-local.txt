@@ -62,3 +62,35 @@ Registros:
   Corrigido localmente e validado
 - Observacoes:
   A validacao passou a considerar a duracao do servico contra o horario final da disponibilidade e tambem conflito com agendamentos ativos do mesmo profissional.
+
+4.
+- Data/hora: 2026-05-26
+- Area: Ambiente local / validacao final APS
+- Passos para reproduzir:
+  Executar validacao final do card de entrega com `docker compose up --build -d` e checagem dos endpoints locais.
+- Resultado esperado:
+  Stack sobe com backend, frontend e banco disponiveis nas portas padrao.
+- Resultado obtido:
+  Validado com sucesso. `docker compose ps` mostrou `api`, `frontend` e `db` em estado `Up`; `http://127.0.0.1:8000/api/health` retornou `200`; `http://127.0.0.1:8501` retornou `200`.
+- Severidade:
+  Informativo
+- Status:
+  Validado
+- Observacoes:
+  Persistiu apenas o bloqueio do Python local resolvido pelo alias `WindowsApps`, impedindo reexecucao de testes fora do Docker nesta sessao.
+
+5.
+- Data/hora: 2026-05-26
+- Area: Ambiente local / execucao de suites
+- Passos para reproduzir:
+  Rodar as suites com containers temporarios montando o workspace atual do repositorio.
+- Resultado esperado:
+  Conseguir validar integracao e frontend mesmo com o Python local do Windows indisponivel para execucao direta.
+- Resultado obtido:
+  Validado com sucesso. Suite de integracao: `40 passed`. Suite frontend/UI: `37 passed` e `7 subtests passed`.
+- Severidade:
+  Informativo
+- Status:
+  Validado
+- Observacoes:
+  Foi identificado e corrigido um problema de isolamento da sessao de banco para ambientes de teste e uma fragilidade temporal no teste UI de confirmacao de agendamento.
