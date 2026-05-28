@@ -1,0 +1,76 @@
+{
+  "context": {
+    "project": "TECHNOVINHO",
+    "sprint": 4,
+    "responsible": "Pedro Lucas",
+    "support": "Lucio Lima",
+    "recorded_at": "2026-05-27",
+    "scope": "Rodada de validacao minuciosa de API"
+  },
+  "summary": {
+    "total": 61,
+    "passed": 61,
+    "failed": 0,
+    "blocked": 0,
+    "pass_rate": "100%"
+  },
+  "coverage": [
+    {
+      "area": "Autenticacao e autorizacao",
+      "status": "approved",
+      "evidence": "RNF01_SECURITY_MATRIX.md e testes de seguranca"
+    },
+    {
+      "area": "CRUD de servicos",
+      "status": "approved",
+      "evidence": "RF02_SERVICES_MATRIX.md e tests/integration/test_services_rf02.py"
+    },
+    {
+      "area": "Profissionais",
+      "status": "approved",
+      "evidence": "RF03_PROFESSIONALS_MATRIX.md e tests/integration/test_professionals_rf03.py"
+    },
+    {
+      "area": "Agendamentos, historico e cancelamento",
+      "status": "approved",
+      "evidence": "SPRINT3_E2E_MATRIX.md e tests/integration/test_sprint3_e2e.py"
+    },
+    {
+      "area": "Testes exploratorios de API",
+      "status": "approved",
+      "evidence": "SPRINT4_API_EXPLORATORY.md e tests/integration/test_sprint4_api_exploratory.py"
+    },
+    {
+      "area": "Desempenho RNF03",
+      "status": "approved",
+      "evidence": "RNF03_PERFORMANCE_JMETER.md e aggregate-summary.csv"
+    }
+  ],
+  "bugs": [
+    {
+      "id": "BUG-001",
+      "title": "Agendamento sem horarios passados",
+      "status": "tracked",
+      "branch": "feature/caue-bug-001-agendar-sem-horarios-passados"
+    },
+    {
+      "id": "BUG-002",
+      "title": "Confirmacao visual do agendamento na UI",
+      "status": "tracked",
+      "branch": "feature/jose-bug-002-confirmacao-ui"
+    }
+  ],
+  "known_gaps": [
+    {
+      "id": "GAP-001",
+      "description": "Links externos no Trello/Notion precisam ser adicionados manualmente por falta de acesso direto ao board neste ambiente.",
+      "status": "manual_action_required"
+    },
+    {
+      "id": "GAP-002",
+      "description": "Documentacao UML foi adiada para o final da consolidacao estrutural do codigo.",
+      "status": "accepted"
+    }
+  ]
+}
+
