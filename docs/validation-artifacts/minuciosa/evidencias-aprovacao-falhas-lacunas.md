@@ -20,5 +20,5 @@
 ## Lacunas conhecidas
 
 - GAP-001: anexar ou linkar manualmente os artefatos no Trello/Notion.
-- GAP-002: concluir documentacao UML ao final da consolidacao estrutural.
+- GAP-002: documentacao UML concluida em `docs/UML_DOCUMENTACAO_COMPLETA.md`.
 

@@ -25,7 +25,7 @@ TECHNOVINHO, sem criar um card separado para cada caso aprovado.
 - UI: 13/13 cenarios aprovados
 - Falhas registradas como bugs: BUG-001 e BUG-002
 - Lacunas conhecidas: Trello/Notion externo deve receber os links destes
-  artefatos; UML permanece planejada para o final da consolidacao estrutural.
+  artefatos; UML foi concluida em `docs/UML_DOCUMENTACAO_COMPLETA.md`.
 
 ## Checklist tecnico
 

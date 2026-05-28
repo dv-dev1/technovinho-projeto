@@ -68,8 +68,8 @@
     },
     {
       "id": "GAP-002",
-      "description": "Documentacao UML foi adiada para o final da consolidacao estrutural do codigo.",
-      "status": "accepted"
+      "description": "Documentacao UML foi adiada durante a rodada minuciosa e concluida depois em docs/UML_DOCUMENTACAO_COMPLETA.md.",
+      "status": "resolved"
     }
   ]
 }

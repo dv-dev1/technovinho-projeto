@@ -21,7 +21,7 @@
 | Bug | BUG-001 | Agendamento sem horarios passados | Rastreado em branch remota |
 | Bug | BUG-002 | Confirmacao visual do agendamento na UI | Rastreado com evidencia no repo |
 | Lacuna | GAP-001 | Links Trello/Notion externos | Acao manual necessaria |
-| Lacuna | GAP-002 | UML ainda pendente | Adiada ate estabilizacao da estrutura |
+| Lacuna resolvida | GAP-002 | UML concluida | Registrada em `docs/UML_DOCUMENTACAO_COMPLETA.md` |
 
 ## Conclusao
 
