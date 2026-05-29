@@ -20,9 +20,9 @@ def availability_for_date(rows: list[dict], selected_date: date) -> list[dict]:
 def build_slot_options(
     rows: list[dict],
     *,
+    selected_date: date | None = None,
     duration_minutes: int = 0,
     step_minutes: int = 30,
-    selected_date: date | None = None,
     now: datetime | None = None,
 ) -> list[dict]:
     slots = []

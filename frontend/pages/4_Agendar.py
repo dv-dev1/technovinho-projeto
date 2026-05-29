@@ -103,8 +103,8 @@ except api.ApiError as err:
 day_availability = scheduling.availability_for_date(availability, selected_date)
 slot_options = scheduling.build_slot_options(
     day_availability,
-    duration_minutes=int(selected_service["duration"]),
     selected_date=selected_date,
+    duration_minutes=int(selected_service["duration"]),
 )
 
 st.subheader("4. Horario")

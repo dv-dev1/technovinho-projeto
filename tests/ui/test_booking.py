@@ -1,4 +1,5 @@
-from datetime import date, timedelta
+from datetime import date, datetime
+from datetime import timedelta
 from pathlib import Path
 
 from streamlit.testing.v1 import AppTest
@@ -75,7 +76,9 @@ def test_booking_form_validates_empty_required_options(monkeypatch):
 
 def test_successful_booking_shows_confirmation_text(monkeypatch):
     import frontend.lib.api as api
+    import frontend.lib.scheduling as scheduling
     import lib.api as runtime_api
+    import lib.scheduling as runtime_scheduling
 
     disable_sidebar_nav(monkeypatch)
     target_date = date.today() + timedelta(days=1)
@@ -89,6 +92,7 @@ def test_successful_booking_shows_confirmation_text(monkeypatch):
     availability = [
         {"day_of_week": target_date.weekday(), "start_time": "09:00", "end_time": "10:00"}
     ]
+    fake_now = datetime.combine(date.today(), datetime.min.time()).replace(hour=8, minute=0)
 
     def fake_create_appointment(token, payload):
         assert payload["professional_id"] == 1
@@ -110,6 +114,8 @@ def test_successful_booking_shows_confirmation_text(monkeypatch):
     monkeypatch.setattr(runtime_api, "list_active_professionals", lambda token: professionals)
     monkeypatch.setattr(runtime_api, "list_availability", lambda token, professional_id: availability)
     monkeypatch.setattr(runtime_api, "create_appointment", fake_create_appointment)
+    monkeypatch.setattr(scheduling, "datetime", type("FrozenDateTime", (), {"now": staticmethod(lambda: fake_now), "combine": datetime.combine}))
+    monkeypatch.setattr(runtime_scheduling, "datetime", type("FrozenDateTime", (), {"now": staticmethod(lambda: fake_now), "combine": datetime.combine}))
 
     app = authenticated_booking_app().run()
     app.date_input[0].set_value(target_date).run()
@@ -120,6 +126,47 @@ def test_successful_booking_shows_confirmation_text(monkeypatch):
     confirmation_buttons[0].click().run()
 
     assert app.session_state["last_booking"]["id"] == 99
+    assert "Agendamento solicitado." in app.success[0].value
     assert any(
         "Agendamento solicitado." in message.value for message in app.success
     ), "Confirmacao visivel deve ser exibida apos o agendamento"
+
+
+def test_today_booking_hides_past_slots(monkeypatch):
+    import frontend.lib.api as api
+    import frontend.lib.scheduling as scheduling
+    import lib.api as runtime_api
+    import lib.scheduling as runtime_scheduling
+
+    disable_sidebar_nav(monkeypatch)
+
+    today = date.today()
+    services = [
+        {"id": 1, "name": "Corte masculino", "duration": 30, "price": 35.0, "active": True}
+    ]
+    professionals = [
+        {"id": 1, "name": "Barbeiro Seed", "specialty": "Corte", "active": True}
+    ]
+    availability = [{"day_of_week": today.weekday(), "start_time": "09:00", "end_time": "11:00"}]
+    fake_now = datetime.combine(today, datetime.min.time()).replace(hour=10, minute=15)
+
+    monkeypatch.setattr(api, "list_services", lambda token: services)
+    monkeypatch.setattr(api, "list_active_professionals", lambda token: professionals)
+    monkeypatch.setattr(api, "list_availability", lambda token, professional_id: availability)
+    monkeypatch.setattr(runtime_api, "list_services", lambda token: services)
+    monkeypatch.setattr(runtime_api, "list_active_professionals", lambda token: professionals)
+    monkeypatch.setattr(runtime_api, "list_availability", lambda token, professional_id: availability)
+    monkeypatch.setattr(
+        scheduling,
+        "datetime",
+        type("FrozenDateTime", (), {"now": staticmethod(lambda: fake_now), "combine": datetime.combine}),
+    )
+    monkeypatch.setattr(
+        runtime_scheduling,
+        "datetime",
+        type("FrozenDateTime", (), {"now": staticmethod(lambda: fake_now), "combine": datetime.combine}),
+    )
+
+    app = authenticated_booking_app().run()
+
+    assert app.selectbox[2].options == ["10:30"]

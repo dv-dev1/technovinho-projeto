@@ -91,6 +91,5 @@ class SchedulingTests(unittest.TestCase):
 
         self.assertEqual([{"label": "09:00", "time": time(9, 0)}], slots)
 
-
 if __name__ == "__main__":
     unittest.main()

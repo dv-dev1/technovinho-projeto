@@ -1,15 +1,51 @@
-# TECHNOVINHO — API
+# TECHNOVINHO
 
-Sistema de gestão de barbearias (APS E3 · GTIADS 2026.1).
+Sistema de gestao de barbearias para a APS E3 (GTIADS 2026.1 / UNIPE).
 
-| Camada | Stack |
-|--------|--------|
-| API | Python 3.11 · FastAPI · SQLAlchemy · Alembic |
-| DB | PostgreSQL 15 |
-| Auth | JWT (python-jose) · bcrypt (passlib) |
+## Repositorio
 
-- **Trello:** https://trello.com/b/VPTx8KsB/technovinho
-- **Legado (referência):** [api-agendamento-backend](https://github.com/dv-dev1/api-agendamento-backend)
+- Web: `https://github.com/dv-dev1/technovinho-projeto`
+- Clone HTTPS: `https://github.com/dv-dev1/technovinho-projeto.git`
+- Clone SSH: `git@github.com:dv-dev1/technovinho-projeto.git`
+- Trello: `https://trello.com/b/VPTx8KsB/technovinho`
+- Figma: `a definir pelo time`
+
+## Stack
+
+| Camada | Tecnologia |
+|---|---|
+| Backend | Python 3.11, FastAPI, SQLAlchemy, Alembic |
+| Frontend | Streamlit |
+| Banco | PostgreSQL 15 |
+| Infra | Docker Compose |
+| Auth | JWT (`python-jose`) + bcrypt (`passlib`) |
+
+## Como clonar
+
+```bash
+git clone https://github.com/dv-dev1/technovinho-projeto.git
+cd technovinho-projeto
+```
+
+Opcionalmente, voce pode trocar o `origin` para SSH depois que sua chave estiver configurada:
+
+```bash
+git remote set-url origin git@github.com:dv-dev1/technovinho-projeto.git
+```
+
+## Fluxo de branches
+
+- `main`: versao de entrega / demo APS
+- `develop`: integracao continua do time
+- `feature/*`: implementacao de um card ou entrega fechavel
+
+Exemplos de nomes:
+
+- `feature/rf01-auth`
+- `feature/docker-compose`
+- `feature/historico-atendimentos`
+
+O fluxo combinado do time esta em [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Prototipo
 
@@ -21,22 +57,34 @@ Sistema de gestão de barbearias (APS E3 · GTIADS 2026.1).
 
 ```bash
 cp .env.example .env
-# Edite JWT_SECRET no .env
+# Edite JWT_SECRET no .env antes de subir
 
 docker compose up --build
 ```
 
-- API: http://localhost:8000
-- OpenAPI: http://localhost:8000/docs
+Servicos esperados:
 
-## Desenvolvimento local (sem Docker)
+- API: `http://localhost:8000`
+- OpenAPI: `http://localhost:8000/docs`
+- Frontend: `http://localhost:8501`
+
+## Migrations
+
+Com Docker em execucao:
+
+```bash
+docker compose exec api alembic upgrade head
+```
+
+Sem Docker:
 
 ```bash
 cd backend
-python -m venv .venv && source .venv/bin/activate
+python -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
-export DATABASE_URL=postgresql+psycopg2://technovinho:technovinho@localhost:5432/technovinho
-export JWT_SECRET=dev-secret
+set DATABASE_URL=postgresql+psycopg2://technovinho:technovinho@localhost:5432/technovinho
+set JWT_SECRET=dev-secret
 alembic upgrade head
 uvicorn app.main:app --reload
 ```
@@ -50,27 +98,31 @@ pip install -r frontend/requirements.txt -r requirements-dev.txt
 pytest tests/ui
 ```
 
-## Auth (curl)
+## Estrutura rapida
 
-```bash
-curl -X POST http://localhost:8000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Admin","email":"admin@test.com","password":"senha12345","role":"admin"}'
-
-curl -X POST http://localhost:8000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@test.com","password":"senha12345"}'
-
-# Troque TOKEN
-curl http://localhost:8000/api/auth/me -H "Authorization: Bearer TOKEN"
+```text
+backend/   API FastAPI, models, routers, services e Alembic
+frontend/  app Streamlit e paginas
+docs/      documentacao tecnica e paridade de API
 ```
 
-## Branches
+## Auth (curl)
 
-- `main` — entrega APS
-- `develop` — integração
-- `feature/*` — uma task do Trello
+## Auth de exemplo
 
-## Paridade com backend Node
+```bash
+curl -X POST http://localhost:8000/api/auth/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"name\":\"Admin\",\"email\":\"admin@test.com\",\"password\":\"senha12345\",\"role\":\"admin\"}"
 
-Ver [docs/API_PARITY.md](docs/API_PARITY.md).
+curl -X POST http://localhost:8000/api/auth/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"email\":\"admin@test.com\",\"password\":\"senha12345\"}"
+```
+
+## Referencias
+
+- Paridade do backend legado: [docs/API_PARITY.md](docs/API_PARITY.md)
+- Fluxo de contribuicao: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Wiki tecnica: [docs/notion/README.md](docs/notion/README.md)
+- Importacao para Notion: [docs/notion-import/Home.md](docs/notion-import/Home.md)
