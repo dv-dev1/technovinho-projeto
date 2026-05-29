@@ -40,6 +40,44 @@ class SchedulingTests(unittest.TestCase):
             slots,
         )
 
+    def test_build_slot_options_hides_past_slots_for_today(self):
+        today = date(2026, 5, 27)
+        rows = [
+            {"day_of_week": 2, "start_time": "09:00:00", "end_time": "11:00:00"},
+        ]
+
+        slots = scheduling.build_slot_options(
+            rows,
+            selected_date=today,
+            now=datetime(2026, 5, 27, 10, 0),
+        )
+
+        self.assertEqual(
+            [
+                {"label": "10:30", "time": time(10, 30)},
+            ],
+            slots,
+        )
+
+    def test_build_slot_options_keeps_all_slots_for_future_dates(self):
+        rows = [
+            {"day_of_week": 3, "start_time": "09:00:00", "end_time": "10:00:00"},
+        ]
+
+        slots = scheduling.build_slot_options(
+            rows,
+            selected_date=date(2026, 5, 28),
+            now=datetime(2026, 5, 27, 10, 0),
+        )
+
+        self.assertEqual(
+            [
+                {"label": "09:00", "time": time(9, 0)},
+                {"label": "09:30", "time": time(9, 30)},
+            ],
+            slots,
+        )
+
     def test_combine_date_time_returns_iso_payload_value(self):
         self.assertEqual(
             "2026-06-01T14:30:00",
@@ -52,24 +90,6 @@ class SchedulingTests(unittest.TestCase):
         slots = scheduling.build_slot_options(rows, duration_minutes=45)
 
         self.assertEqual([{"label": "09:00", "time": time(9, 0)}], slots)
-
-    def test_build_slot_options_hides_times_before_now_for_today(self):
-        today = date(2026, 6, 1)
-        rows = [{"day_of_week": 0, "start_time": "09:00:00", "end_time": "11:00:00"}]
-
-        slots = scheduling.build_slot_options(
-            rows,
-            selected_date=today,
-            current_datetime=datetime(2026, 6, 1, 10, 15),
-        )
-
-        self.assertEqual(
-            [
-                {"label": "10:30", "time": time(10, 30)},
-            ],
-            slots,
-        )
-
 
 if __name__ == "__main__":
     unittest.main()

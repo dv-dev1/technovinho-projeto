@@ -109,7 +109,10 @@ slot_options = scheduling.build_slot_options(
 
 st.subheader("4. Horario")
 if not slot_options:
-    st.info("Nao ha horarios cadastrados para este profissional nesta data.")
+    if day_availability and selected_date == date.today():
+        st.info("Nao ha horarios futuros disponiveis para este profissional hoje.")
+    else:
+        st.info("Nao ha horarios cadastrados para este profissional nesta data.")
     st.stop()
 
 slot_labels = [slot["label"] for slot in slot_options]
