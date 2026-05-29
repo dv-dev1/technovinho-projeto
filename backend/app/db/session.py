@@ -7,7 +7,12 @@ from app.core.config import settings
 
 
 def _current_database_url() -> str:
-    return os.getenv("DATABASE_URL", settings.database_url)
+    url = os.getenv("DATABASE_URL", settings.database_url)
+    if url and url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif url and url.startswith("postgresql://"):
+        url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
+    return url
 
 
 def _engine_kwargs(database_url: str) -> dict:
