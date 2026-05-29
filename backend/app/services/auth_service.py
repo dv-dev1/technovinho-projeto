@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.security import create_access_token, hash_password, verify_password
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.auth import LoginIn, RegisterIn
 
 
@@ -14,10 +14,16 @@ class InvalidCredentialsError(Exception):
     pass
 
 
+class SelfRegistrationRoleNotAllowedError(Exception):
+    pass
+
+
 def register_user(db: Session, data: RegisterIn) -> User:
     existing = db.scalar(select(User).where(User.email == data.email))
     if existing:
         raise EmailAlreadyExistsError()
+    if data.role != UserRole.client:
+        raise SelfRegistrationRoleNotAllowedError()
 
     user = User(
         name=data.name,

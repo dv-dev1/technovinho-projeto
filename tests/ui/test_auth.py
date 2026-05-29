@@ -41,4 +41,13 @@ def test_seed_credentials_authenticate_user(monkeypatch):
 
     assert app.session_state["token"] == "fake-token"
     assert app.session_state["user"]["name"] == "Cliente Seed"
-    assert "Cliente: use" in app.success[0].value
+    assert any("Acesso de cliente ativo." in element.value for element in app.success)
+
+
+def test_logged_client_home_hides_registration_link():
+    from frontend.lib.ui import nav_items_for_role
+
+    labels = [item["label"] for item in nav_items_for_role("client")]
+
+    assert "Cadastro" not in labels
+    assert "Agendar" in labels

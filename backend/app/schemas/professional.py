@@ -1,8 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 class ProfessionalCreate(BaseModel):
-    user_id: int
+    name: str = Field(min_length=2, max_length=100)
+    email: EmailStr
+    password: str = Field(min_length=8)
     specialty: str | None = Field(default=None, max_length=100)
     active: bool = True
 

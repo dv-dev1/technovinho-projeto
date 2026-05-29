@@ -31,7 +31,7 @@ def get_professional(
     try:
         return professional_service.get_professional(db, professional_id)
     except professional_service.ProfessionalNotFoundError:
-        raise HTTPException(status_code=404, detail="Profissional não encontrado") from None
+        raise HTTPException(status_code=404, detail="Profissional nao encontrado") from None
 
 
 @router.post("/", response_model=ProfessionalOut, status_code=status.HTTP_201_CREATED)
@@ -42,12 +42,8 @@ def create_professional(
 ):
     try:
         return professional_service.create_professional(db, data)
-    except professional_service.UserNotFoundError:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado") from None
-    except professional_service.UserNotBarberError:
-        raise HTTPException(status_code=400, detail="Usuário deve ter role barber") from None
     except professional_service.ProfessionalAlreadyExistsError:
-        raise HTTPException(status_code=409, detail="Profissional já existe para este usuário") from None
+        raise HTTPException(status_code=409, detail="Email ja cadastrado") from None
 
 
 @router.patch("/{professional_id}", response_model=ProfessionalOut)
@@ -60,7 +56,7 @@ def update_professional(
     try:
         return professional_service.update_professional(db, professional_id, data)
     except professional_service.ProfessionalNotFoundError:
-        raise HTTPException(status_code=404, detail="Profissional não encontrado") from None
+        raise HTTPException(status_code=404, detail="Profissional nao encontrado") from None
 
 
 @router.get("/{professional_id}/availability", response_model=list[AvailabilityOut])
@@ -72,7 +68,7 @@ def list_professional_availability(
     try:
         return availability_service.list_for_professional(db, professional_id)
     except availability_service.ProfessionalNotFoundError:
-        raise HTTPException(status_code=404, detail="Profissional não encontrado") from None
+        raise HTTPException(status_code=404, detail="Profissional nao encontrado") from None
 
 
 @router.post(
@@ -89,8 +85,8 @@ def create_professional_availability(
     try:
         return availability_service.create_slot(db, professional_id, data)
     except availability_service.ProfessionalNotFoundError:
-        raise HTTPException(status_code=404, detail="Profissional não encontrado") from None
+        raise HTTPException(status_code=404, detail="Profissional nao encontrado") from None
     except availability_service.InvalidTimeRangeError:
         raise HTTPException(status_code=400, detail="end_time deve ser maior que start_time") from None
     except availability_service.AvailabilityOverlapError:
-        raise HTTPException(status_code=409, detail="Faixa sobrepõe outra no mesmo dia") from None
+        raise HTTPException(status_code=409, detail="Faixa sobrepoe outra no mesmo dia") from None

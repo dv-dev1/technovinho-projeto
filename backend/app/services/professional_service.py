@@ -1,17 +1,10 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.security import hash_password
 from app.models.professional import Professional
 from app.models.user import User, UserRole
 from app.schemas.professional import ProfessionalCreate, ProfessionalUpdate
-
-
-class UserNotFoundError(Exception):
-    pass
-
-
-class UserNotBarberError(Exception):
-    pass
 
 
 class ProfessionalAlreadyExistsError(Exception):
@@ -54,18 +47,21 @@ def get_professional(db: Session, professional_id: int) -> dict:
 
 
 def create_professional(db: Session, data: ProfessionalCreate) -> dict:
-    user = db.get(User, data.user_id)
-    if user is None:
-        raise UserNotFoundError()
-    if user.role != UserRole.barber:
-        raise UserNotBarberError()
-
-    existing = db.scalar(select(Professional).where(Professional.user_id == data.user_id))
-    if existing:
+    existing = db.scalar(select(User).where(User.email == data.email))
+    if existing is not None:
         raise ProfessionalAlreadyExistsError()
 
+    user = User(
+        name=data.name,
+        email=data.email,
+        password=hash_password(data.password),
+        role=UserRole.barber,
+    )
+    db.add(user)
+    db.flush()
+
     professional = Professional(
-        user_id=data.user_id,
+        user_id=user.id,
         specialty=data.specialty,
         active=data.active,
     )

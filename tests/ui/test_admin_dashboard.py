@@ -13,6 +13,8 @@ def test_admin_dashboard_blocks_client_role_from_session_state(monkeypatch):
 
     monkeypatch.setattr(ui, "sidebar_nav", lambda: None)
     monkeypatch.setattr(runtime_ui, "sidebar_nav", lambda: None)
+    monkeypatch.setattr(ui, "page_header", lambda *args, **kwargs: None)
+    monkeypatch.setattr(runtime_ui, "page_header", lambda *args, **kwargs: None)
 
     app = AppTest.from_file(str(DASHBOARD_FILE))
     app.session_state["token"] = "fake-token"
@@ -26,27 +28,19 @@ def test_admin_dashboard_blocks_client_role_from_session_state(monkeypatch):
     assert "Acesso restrito para este perfil." in app.warning[0].value
 
 
-def test_sidebar_nav_links_to_admin_dashboard(monkeypatch):
-    from frontend.lib import ui
+def test_nav_items_include_admin_dashboard_only_for_admin():
+    from frontend.lib.ui import nav_items_for_role
 
-    links = []
+    admin_labels = [item["label"] for item in nav_items_for_role("admin")]
+    client_labels = [item["label"] for item in nav_items_for_role("client")]
 
-    class Sidebar:
-        def __enter__(self):
-            return self
+    assert "Dashboard admin" in admin_labels
+    assert "Dashboard admin" not in client_labels
 
-        def __exit__(self, exc_type, exc, tb):
-            return False
 
-    class FakeStreamlit:
-        sidebar = Sidebar()
+def test_nav_items_give_barber_operational_links():
+    from frontend.lib.ui import nav_items_for_role
 
-        @staticmethod
-        def page_link(path, label, icon=None):
-            links.append((path, label, icon))
+    barber_labels = [item["label"] for item in nav_items_for_role("barber")]
 
-    monkeypatch.setattr(ui, "st", FakeStreamlit)
-
-    ui.sidebar_nav()
-
-    assert ("pages/5_Admin_Dashboard.py", "Dashboard admin", None) in links
+    assert barber_labels == ["Inicio", "Minha agenda", "Historico"]

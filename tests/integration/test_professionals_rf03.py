@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 from app.core.security import hash_password  # noqa: E402
 from app.db.session import SessionLocal  # noqa: E402
 from app.main import app  # noqa: E402
+from app.models.professional import Professional  # noqa: E402
 from app.models.user import User, UserRole  # noqa: E402
 from tests.integration.conftest import clean_integration_db  # noqa: E402
 
@@ -21,35 +22,19 @@ class ProfessionalsRf03IntegrationTests(unittest.TestCase):
                 password=hash_password("senha12345"),
                 role=UserRole.admin,
             )
-            barber = User(
-                name="Barbeiro APS",
-                email="barber.rf03@test.com",
-                password=hash_password("senha12345"),
-                role=UserRole.barber,
-            )
-            barber_two = User(
-                name="Barbeiro Inativo",
-                email="barber2.rf03@test.com",
-                password=hash_password("senha12345"),
-                role=UserRole.barber,
-            )
             client = User(
                 name="Cliente APS",
                 email="client.rf03@test.com",
                 password=hash_password("senha12345"),
                 role=UserRole.client,
             )
-            db.add_all([admin, barber, barber_two, client])
+            db.add_all([admin, client])
             db.commit()
 
             db.refresh(admin)
-            db.refresh(barber)
-            db.refresh(barber_two)
             db.refresh(client)
 
             self.admin_user_id = admin.id
-            self.barber_user_id = barber.id
-            self.barber_two_user_id = barber_two.id
             self.client_user_id = client.id
 
     def _admin_token(self):
@@ -60,58 +45,131 @@ class ProfessionalsRf03IntegrationTests(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         return response.json()["access_token"]
 
-    def test_admin_can_create_professional_with_barber_user(self):
+    def _client_token(self):
+        response = self.client.post(
+            "/api/auth/login",
+            json={"email": "client.rf03@test.com", "password": "senha12345"},
+        )
+        self.assertEqual(200, response.status_code)
+        return response.json()["access_token"]
+
+    def test_admin_can_create_professional_with_barber_credentials(self):
         response = self.client.post(
             "/api/professionals",
             headers={"Authorization": f"Bearer {self._admin_token()}"},
-            json={"user_id": self.barber_user_id, "specialty": "Degrade", "active": True},
+            json={
+                "name": "Barbeiro APS",
+                "email": "barber.rf03@test.com",
+                "password": "senha12345",
+                "specialty": "Degrade",
+                "active": True,
+            },
         )
 
         self.assertEqual(201, response.status_code)
         body = response.json()
-        self.assertEqual(self.barber_user_id, body["user_id"])
         self.assertEqual("Barbeiro APS", body["name"])
+        self.assertEqual("barber.rf03@test.com", body["email"])
         self.assertEqual("Degrade", body["specialty"])
         self.assertTrue(body["active"])
 
-    def test_duplicate_user_id_returns_conflict(self):
+        with SessionLocal() as db:
+            barber_user = db.query(User).filter(User.email == "barber.rf03@test.com").one()
+            professional = db.query(Professional).filter(Professional.user_id == barber_user.id).one()
+
+        self.assertEqual(UserRole.barber, barber_user.role)
+        self.assertEqual("Degrade", professional.specialty)
+
+        login = self.client.post(
+            "/api/auth/login",
+            json={"email": "barber.rf03@test.com", "password": "senha12345"},
+        )
+        self.assertEqual(200, login.status_code)
+        me = self.client.get("/api/auth/me", headers={"Authorization": f"Bearer {login.json()['access_token']}"})
+        self.assertEqual("barber", me.json()["role"])
+
+    def test_duplicate_email_returns_conflict(self):
         headers = {"Authorization": f"Bearer {self._admin_token()}"}
         first = self.client.post(
             "/api/professionals",
             headers=headers,
-            json={"user_id": self.barber_user_id, "specialty": "Corte", "active": True},
+            json={
+                "name": "Barbeiro APS",
+                "email": "barber.rf03@test.com",
+                "password": "senha12345",
+                "specialty": "Corte",
+                "active": True,
+            },
         )
         second = self.client.post(
             "/api/professionals",
             headers=headers,
-            json={"user_id": self.barber_user_id, "specialty": "Barba", "active": True},
+            json={
+                "name": "Outro Nome",
+                "email": "barber.rf03@test.com",
+                "password": "senha12345",
+                "specialty": "Barba",
+                "active": True,
+            },
         )
 
         self.assertEqual(201, first.status_code)
         self.assertEqual(409, second.status_code)
-        self.assertIn("existe", second.json()["detail"].lower())
+        self.assertIn("email", second.json()["detail"].lower())
 
-    def test_non_barber_user_is_rejected(self):
+    def test_invalid_payload_returns_422(self):
         response = self.client.post(
             "/api/professionals",
             headers={"Authorization": f"Bearer {self._admin_token()}"},
-            json={"user_id": self.client_user_id, "specialty": "Nao deve criar", "active": True},
+            json={
+                "name": "A",
+                "email": "email-invalido",
+                "password": "123",
+                "specialty": "Nao deve criar",
+                "active": True,
+            },
         )
 
-        self.assertEqual(400, response.status_code)
-        self.assertIn("barber", response.json()["detail"].lower())
+        self.assertEqual(422, response.status_code)
+
+    def test_client_role_cannot_create_professional(self):
+        response = self.client.post(
+            "/api/professionals",
+            headers={"Authorization": f"Bearer {self._client_token()}"},
+            json={
+                "name": "Barbeiro Bloqueado",
+                "email": "barber.bloqueado.rf03@test.com",
+                "password": "senha12345",
+                "specialty": "Corte",
+                "active": True,
+            },
+        )
+
+        self.assertEqual(403, response.status_code)
 
     def test_inactive_professional_is_hidden_from_active_only_listing(self):
         headers = {"Authorization": f"Bearer {self._admin_token()}"}
         created_active = self.client.post(
             "/api/professionals",
             headers=headers,
-            json={"user_id": self.barber_user_id, "specialty": "Corte", "active": True},
+            json={
+                "name": "Barbeiro Ativo",
+                "email": "barber.ativo.rf03@test.com",
+                "password": "senha12345",
+                "specialty": "Corte",
+                "active": True,
+            },
         )
         created_inactive = self.client.post(
             "/api/professionals",
             headers=headers,
-            json={"user_id": self.barber_two_user_id, "specialty": "Barba", "active": False},
+            json={
+                "name": "Barbeiro Inativo",
+                "email": "barber.inativo.rf03@test.com",
+                "password": "senha12345",
+                "specialty": "Barba",
+                "active": False,
+            },
         )
         self.assertEqual(201, created_active.status_code)
         self.assertEqual(201, created_inactive.status_code)
@@ -124,7 +182,7 @@ class ProfessionalsRf03IntegrationTests(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         rows = response.json()
         self.assertEqual(1, len(rows))
-        self.assertEqual(self.barber_user_id, rows[0]["user_id"])
+        self.assertEqual("barber.ativo.rf03@test.com", rows[0]["email"])
         self.assertTrue(rows[0]["active"])
 
 

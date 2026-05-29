@@ -17,7 +17,12 @@ def register(data: RegisterIn, db: Annotated[Session, Depends(get_db)]):
     try:
         user = auth_service.register_user(db, data)
     except auth_service.EmailAlreadyExistsError:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email já cadastrado") from None
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email ja cadastrado") from None
+    except auth_service.SelfRegistrationRoleNotAllowedError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cadastro publico disponivel apenas para clientes",
+        ) from None
     return user
 
 
@@ -28,7 +33,7 @@ def login(data: LoginIn, db: Annotated[Session, Depends(get_db)]):
     except auth_service.InvalidCredentialsError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Email ou senha inválidos",
+            detail="Email ou senha invalidos",
         ) from None
     return TokenOut(access_token=token)
 

@@ -61,6 +61,20 @@ class SecurityRNF01Tests(unittest.TestCase):
         self.assertNotEqual("senha12345", user.password)
         self.assertTrue(user.password.startswith("$2b$"))
 
+    def test_register_rejects_non_client_role(self):
+        response = self.client.post(
+            "/api/auth/register",
+            json={
+                "name": "Barbeiro Publico",
+                "email": "barbeiro.publico@test.com",
+                "password": "senha12345",
+                "role": "barber",
+            },
+        )
+
+        self.assertEqual(403, response.status_code)
+        self.assertIn("clientes", response.json()["detail"].lower())
+
 
 if __name__ == "__main__":
     unittest.main()

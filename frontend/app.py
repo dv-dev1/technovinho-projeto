@@ -2,43 +2,58 @@ import streamlit as st
 
 from lib import api, auth, ui
 
-st.set_page_config(page_title="TECHNOVINHO", page_icon=":scissors:", layout="wide")
+st.set_page_config(page_title="Technovinho", layout="wide")
 
 auth.ensure_session_defaults()
 ui.sidebar_nav()
 
-st.title("TECHNOVINHO")
-st.caption("Gestao de barbearias - APS")
+role = ui.current_role()
+summary = ui.role_summary(role)
 
-with st.sidebar:
-    if st.session_state.token:
-        st.write(f"**{st.session_state.user_name or 'Usuario'}**")
-        st.caption(f"Perfil: {st.session_state.user_role or 'sem perfil'}")
-        if st.button("Sair"):
-            auth.logout()
-            st.rerun()
-    else:
-        st.subheader("Login")
-        with st.form("login"):
-            email = st.text_input("Email")
-            password = st.text_input("Senha", type="password")
-            if st.form_submit_button("Entrar"):
-                try:
-                    with st.spinner("Entrando..."):
-                        data = api.login(email, password)
-                        user = api.me(data["access_token"])
-                    auth.set_authenticated_session(data["access_token"], user)
-                    st.rerun()
-                except api.ApiError as err:
-                    ui.show_api_error(err)
-        st.page_link("pages/0_Registro.py", label="Criar conta")
-
-if st.session_state.token:
-    if st.session_state.user_role == "admin":
-        st.success("Admin: use Dashboard admin, Profissionais e Disponibilidade.")
-    elif st.session_state.user_role == "client":
-        st.success("Cliente: use Agendar e Meus agendamentos.")
-    else:
-        st.info("Use o menu conforme seu perfil.")
+if role == "guest":
+    col1, col2, col3 = st.columns([1, 1.2, 1], gap="large")
+    with col2:
+        st.write("")
+        ui.page_header(
+            "Technovinho",
+            "Acesse sua conta para continuar.",
+            eyebrow="BARBEARIA"
+        )
+        with st.form("login", enter_to_submit=False):
+            email = st.text_input("E-mail", placeholder="seu@email.com")
+            password = st.text_input("Senha", type="password", placeholder="Sua senha")
+            submitted = st.form_submit_button("Entrar", type="primary")
+            
+        if submitted:
+            try:
+                with st.spinner("Autenticando..."):
+                    data = api.login(email, password)
+                    user = api.me(data["access_token"])
+                auth.set_authenticated_session(data["access_token"], user)
+                st.rerun()
+            except api.ApiError as err:
+                ui.show_api_error(err)
 else:
-    st.info("Entre ou crie uma conta para acessar as funcionalidades do TECHNOVINHO.")
+    ui.page_header(
+        "Technovinho",
+        summary["summary"] or "Painel de gestao da barbearia.",
+        eyebrow="PAINEL",
+    )
+
+    main_col, side_col = st.columns([1.6, 1], gap="large")
+
+    with main_col:
+        quick_actions = ui.nav_items_for_role(role)[1:]
+        if quick_actions:
+            action_cols = st.columns(min(3, len(quick_actions)))
+            for index, item in enumerate(quick_actions):
+                with action_cols[index % len(action_cols)]:
+                    ui.safe_page_link(item["path"], label=item["label"], icon=item["icon"])
+
+    with side_col:
+        with st.container(border=True):
+            st.caption(f"{st.session_state.user_name or 'Usuario'} · {ui.role_label(role)}")
+            if st.button("Sair"):
+                auth.logout()
+                st.rerun()
+

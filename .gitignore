@@ -12,3 +12,11 @@ build/
 .DS_Store
 .idea/
 .vscode/
+
+# Local tools & logs
+.python311/
+.gemini/
+*.log
+*.db
+*.zip
+*.nupkg

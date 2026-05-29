@@ -85,6 +85,14 @@ class AppointmentFlowIntegrationTests(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         return response.json()["access_token"]
 
+    def _barber_token(self):
+        response = self.client.post(
+            "/api/auth/login",
+            json={"email": "barbeiro@test.com", "password": "senha12345"},
+        )
+        self.assertEqual(200, response.status_code)
+        return response.json()["access_token"]
+
     def _appointment_payload(self, scheduled_time=time(14, 0)):
         return {
             "professional_id": self.professional_id,
@@ -214,6 +222,23 @@ class AppointmentFlowIntegrationTests(unittest.TestCase):
         self.assertEqual("done", completed.json()["status"])
         self.assertEqual([appointment_id], [row["id"] for row in history.json()])
         self.assertEqual("35.00", history.json()[0]["service_price"])
+
+    def test_barber_sees_only_own_appointments(self):
+        created = self.client.post(
+            "/api/appointments",
+            headers={"Authorization": f"Bearer {self._login_token()}"},
+            json=self._appointment_payload(),
+        )
+
+        response = self.client.get(
+            "/api/appointments",
+            headers={"Authorization": f"Bearer {self._barber_token()}"},
+        )
+
+        self.assertEqual(201, created.status_code)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual([created.json()["id"]], [row["id"] for row in response.json()])
+        self.assertEqual("Barbeiro Teste", response.json()[0]["professional_name"])
 
     def test_future_appointment_cannot_be_completed(self):
         created = self.client.post(

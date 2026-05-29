@@ -85,7 +85,11 @@ def list_appointments(
 ) -> list[dict]:
     stmt = _base_query().order_by(Appointment.scheduled_at.desc())
 
-    if current_user.role != UserRole.admin or mine:
+    if current_user.role == UserRole.admin and not mine:
+        pass
+    elif current_user.role == UserRole.barber:
+        stmt = stmt.join(Appointment.professional).where(Professional.user_id == current_user.id)
+    else:
         stmt = stmt.where(Appointment.client_id == current_user.id)
     if status is not None:
         stmt = stmt.where(Appointment.status == status)
