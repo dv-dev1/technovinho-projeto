@@ -64,11 +64,11 @@ def me(token: str) -> dict:
 
 
 def list_services(token: str | None = None) -> list:
-    return _request("GET", "/api/services", token=token) or []
+    return _request("GET", "/api/services/", token=token) or []
 
 
 def create_service(token: str, payload: dict) -> dict:
-    return _request("POST", "/api/services", token=token, json=payload)
+    return _request("POST", "/api/services/", token=token, json=payload)
 
 
 def update_service(token: str, service_id: int, payload: dict) -> dict:
@@ -76,15 +76,15 @@ def update_service(token: str, service_id: int, payload: dict) -> dict:
 
 
 def list_professionals(token: str) -> list:
-    return _request("GET", "/api/professionals", token=token) or []
+    return _request("GET", "/api/professionals/", token=token) or []
 
 
 def list_active_professionals(token: str) -> list:
-    return _request("GET", "/api/professionals", token=token, params={"active_only": "true"}) or []
+    return _request("GET", "/api/professionals/", token=token, params={"active_only": "true"}) or []
 
 
 def create_professional(token: str, payload: dict) -> dict:
-    return _request("POST", "/api/professionals", token=token, json=payload)
+    return _request("POST", "/api/professionals/", token=token, json=payload)
 
 
 def update_professional(token: str, professional_id: int, payload: dict) -> dict:
@@ -109,11 +109,11 @@ def list_appointments(token: str, *, status: str | None = None, mine: bool = Fal
         params["status"] = status
     if mine:
         params["mine"] = "true"
-    return _request("GET", "/api/appointments", token=token, params=params) or []
+    return _request("GET", "/api/appointments/", token=token, params=params) or []
 
 
 def create_appointment(token: str, payload: dict) -> dict:
-    return _request("POST", "/api/appointments", token=token, json=payload)
+    return _request("POST", "/api/appointments/", token=token, json=payload)
 
 
 def cancel_appointment(token: str, appointment_id: int) -> dict:
